@@ -1,7 +1,6 @@
 use alloc::vec::Vec;
 
 use crate::coord::Col;
-use crate::coord::Row;
 use crate::coord::Square;
 use crate::game::PieceCounts;
 use crate::game::attacked_squares;
@@ -109,7 +108,7 @@ impl Board {
     }
 
     #[must_use]
-    pub fn piece_counts(&self) -> PieceCounts {
+    pub(crate) fn piece_counts(&self) -> PieceCounts {
         let mut piece_counts = PieceCounts::default();
         for square in Square::ALL {
             if let Some(piece) = self[square] {
