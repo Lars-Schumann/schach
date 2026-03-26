@@ -193,19 +193,14 @@ pub struct GameStateCore {
 }
 impl GameStateCore {
     #[must_use]
-    pub const fn with_opponent_active(mut self) -> Self {
+    pub(crate) const fn with_opponent_active(mut self) -> Self {
         self.active_player = self.active_player.opponent();
         self
     }
 
     #[must_use]
     pub(crate) const fn has_castling_right(&self, castling_side: CastlingSide) -> bool {
-        match (self.active_player, castling_side) {
-            (PlayerKind::White, CastlingSide::Kingside) => self.castling_rights.white_kingside,
-            (PlayerKind::White, CastlingSide::Queenside) => self.castling_rights.white_queenside,
-            (PlayerKind::Black, CastlingSide::Kingside) => self.castling_rights.black_kingside,
-            (PlayerKind::Black, CastlingSide::Queenside) => self.castling_rights.black_queenside,
-        }
+        self.castling_rights[(self.active_player, castling_side)]
     }
 
     pub(crate) const fn deny_castling(
@@ -213,20 +208,7 @@ impl GameStateCore {
         for_player: PlayerKind,
         castling_side: CastlingSide,
     ) {
-        match (for_player, castling_side) {
-            (PlayerKind::White, CastlingSide::Kingside) => {
-                self.castling_rights.white_kingside = false;
-            }
-            (PlayerKind::White, CastlingSide::Queenside) => {
-                self.castling_rights.white_queenside = false;
-            }
-            (PlayerKind::Black, CastlingSide::Kingside) => {
-                self.castling_rights.black_kingside = false;
-            }
-            (PlayerKind::Black, CastlingSide::Queenside) => {
-                self.castling_rights.black_queenside = false;
-            }
-        }
+        self.castling_rights[(for_player, castling_side)] = false;
     }
 
     //TODO: better name
@@ -487,9 +469,36 @@ impl CastlingRights {
 const X: bool = true;
 const O: bool = false;
 
-impl Default for CastlingRights {
+impl const Default for CastlingRights {
     fn default() -> Self {
         Self::all_available()
+    }
+}
+
+impl const Index<(PlayerKind, CastlingSide)> for CastlingRights {
+    type Output = bool;
+
+    fn index(&self, (player, castling_side): (PlayerKind, CastlingSide)) -> &Self::Output {
+        match (player, castling_side) {
+            (PlayerKind::White, CastlingSide::Kingside) => &self.white_kingside,
+            (PlayerKind::White, CastlingSide::Queenside) => &self.white_queenside,
+            (PlayerKind::Black, CastlingSide::Kingside) => &self.black_kingside,
+            (PlayerKind::Black, CastlingSide::Queenside) => &self.black_queenside,
+        }
+    }
+}
+
+impl const IndexMut<(PlayerKind, CastlingSide)> for CastlingRights {
+    fn index_mut(
+        &mut self,
+        (player, castling_side): (PlayerKind, CastlingSide),
+    ) -> &mut Self::Output {
+        match (player, castling_side) {
+            (PlayerKind::White, CastlingSide::Kingside) => &mut self.white_kingside,
+            (PlayerKind::White, CastlingSide::Queenside) => &mut self.white_queenside,
+            (PlayerKind::Black, CastlingSide::Kingside) => &mut self.black_kingside,
+            (PlayerKind::Black, CastlingSide::Queenside) => &mut self.black_queenside,
+        }
     }
 }
 
