@@ -114,18 +114,18 @@ fn notation_creator(
 
     let mut append = vec![];
     match outcome {
-        | StepResult::Ongoing(future) => {
+        | StepResult::Continue(future) => {
             if future.core.board.is_king_checked(future.core.active_player) {
                 append.push(AsciiChar::PlusSign);
             }
         }
-        | StepResult::Terminated(GameResult {
+        | StepResult::Break(GameResult {
             kind: GameResultKind::Win,
             ..
         }) => {
             append.push(AsciiChar::NumberSign);
         }
-        | StepResult::Terminated(GameResult {
+        | StepResult::Break(GameResult {
             kind: GameResultKind::Draw(_),
             ..
         }) => { /* TODO: nothing yet, this isn't Ascii :[ 1/2 / 1/2 or smt */ }

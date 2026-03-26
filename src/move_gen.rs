@@ -34,15 +34,15 @@ impl GameState<Ongoing> {
 
                 for mv in legal_moves {
                     match game.clone().step(mv) {
-                        StepResult::Terminated(GameResult {
+                        StepResult::Break(GameResult {
                             kind: GameResultKind::Win,
                             final_game_state,
                         }) => terminated_games_checkmate.push(final_game_state),
-                        StepResult::Terminated(GameResult {
+                        StepResult::Break(GameResult {
                             kind: GameResultKind::Draw(_),
                             final_game_state,
                         }) => terminated_games_draw.push(final_game_state),
-                        StepResult::Ongoing(game_state) => {
+                        StepResult::Continue(game_state) => {
                             new_continued_games.push(game_state);
                         }
                     }
@@ -79,15 +79,15 @@ impl GameState<Ongoing> {
                 .to_owned();
 
             match game.clone().step(random_move) {
-                StepResult::Ongoing(game_state) => {
+                StepResult::Continue(game_state) => {
                     game = game_state;
                 }
-                terminated @ StepResult::Terminated(_) => {
+                terminated @ StepResult::Break(_) => {
                     return terminated;
                 }
             }
         }
-        StepResult::Ongoing(game)
+        StepResult::Continue(game)
     }
 }
 
@@ -379,8 +379,8 @@ mod tests {
 
         (0..walk_count).into_par_iter().panic_fuse().for_each(|i| {
             match game.clone().random_walk(max_depth, owl_checker_depth_1) {
-                StepResult::Ongoing(GameState { core, .. })
-                | StepResult::Terminated(GameResult {
+                StepResult::Continue(GameState { core, .. })
+                | StepResult::Break(GameResult {
                     final_game_state: GameState { core, .. },
                     ..
                 }) => println!("{i}: {:?}", core.full_move_count),
@@ -407,7 +407,7 @@ mod tests {
             let owl_move = owlchess::Move::from_san(schach_move_san.as_str(), &owl_board).unwrap();
 
             let new_owl_board = owl_board.make_move(owl_move).unwrap();
-            let StepResult::Ongoing(new_schach_board) = game.clone().step(*mv) else {
+            let StepResult::Continue(new_schach_board) = game.clone().step(*mv) else {
                 continue;
             };
 

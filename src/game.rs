@@ -1,5 +1,6 @@
 use alloc::vec::Vec;
 use core::num::NonZeroU64;
+use core::ops::ControlFlow;
 use core::ops::Index;
 use core::ops::IndexMut;
 use core::ops::Not;
@@ -53,11 +54,13 @@ pub struct GameResult {
     pub final_game_state: GameState<Terminated>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum StepResult {
-    Ongoing(GameState<Ongoing>),
-    Terminated(GameResult),
-}
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub enum StepResult {
+//     Ongoing(GameState<Ongoing>),
+//     Terminated(GameResult),
+// }
+
+pub type StepResult = ControlFlow<GameResult, GameState<Ongoing>>;
 
 #[derive_const(Default, Clone, PartialEq, Eq)]
 #[derive(Debug, Copy, Hash)]
@@ -290,7 +293,6 @@ impl GameState<Ongoing> {
         }
     }
 
-    #[must_use]
     pub fn step(mut self, mv: Move) -> StepResult {
         self.core.board.apply_move(mv);
         let mut game = self;
@@ -361,12 +363,12 @@ impl GameState<Ongoing> {
         let future = game.core.with_opponent_active();
         if future.legal_moves().count() == 0 {
             return if future.board.is_king_checked(future.active_player) {
-                StepResult::Terminated(GameResult {
+                StepResult::Break(GameResult {
                     kind: GameResultKind::Win,
                     final_game_state: game.terminated(),
                 })
             } else {
-                StepResult::Terminated(GameResult {
+                StepResult::Break(GameResult {
                     kind: GameResultKind::Draw(DrawKind::Stalemate),
                     final_game_state: game.terminated(),
                 })
@@ -381,14 +383,14 @@ impl GameState<Ongoing> {
                 .count()
                 == REPETITIONS_TO_FORCED_DRAW_COUNT
             {
-                return StepResult::Terminated(GameResult {
+                return StepResult::Break(GameResult {
                     kind: GameResultKind::Draw(DrawKind::ThreefoldRepetition),
                     final_game_state: game.terminated(),
                 });
             }
 
             if game.core.fifty_move_rule_clock == FIFTY_MOVE_RULE_COUNT {
-                return StepResult::Terminated(GameResult {
+                return StepResult::Break(GameResult {
                     kind: GameResultKind::Draw(DrawKind::FiftyMove),
                     final_game_state: game.terminated(),
                 });
@@ -398,7 +400,7 @@ impl GameState<Ongoing> {
         let piece_counts = game.core.board.piece_counts();
 
         if piece_counts == PieceCounts::KINGS_ONLY {
-            return StepResult::Terminated(GameResult {
+            return StepResult::Break(GameResult {
                 kind: GameResultKind::Draw(DrawKind::InsufficientMaterial),
                 final_game_state: game.terminated(),
             });
@@ -409,7 +411,7 @@ impl GameState<Ongoing> {
         }
 
         game.core.active_player = game.core.active_player.opponent();
-        StepResult::Ongoing(game)
+        StepResult::Continue(game)
     }
 }
 
