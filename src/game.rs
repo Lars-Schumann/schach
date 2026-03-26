@@ -515,11 +515,10 @@ pub(crate) gen fn attacked_squares(
     let (directions, range_upper_bound) = piece.threat_directions();
     let range_upper_bound = i32::from(range_upper_bound);
 
-    let rays = directions.iter().map(move |direction| {
+    let rays = directions.iter().map(move |&direction| {
         (1..=range_upper_bound)
-            .map(move |range| origin + (*direction * range))
-            .take_while(Result::is_ok) // ugly but right, once this is Err(_) once, it'll _always_ be out of bounds!
-            .map(Result::unwrap)
+            .map(move |range| origin + (direction * range)) // once this is Err(_) once, it'll _always_ be out of bounds
+            .map_while(Result::ok)
     });
 
     for ray in rays {
