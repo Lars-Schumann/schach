@@ -150,9 +150,9 @@ impl core::fmt::Debug for Board {
                 Some(piece) => write!(f, "{piece} ")?,
                 None => {
                     if square.is_black() {
-                        write!(f, "□ ",)?;
+                        write!(f, "□ ")?;
                     } else {
-                        write!(f, "■ ",)?;
+                        write!(f, "■ ")?;
                     }
                 }
             }
@@ -181,20 +181,20 @@ impl core::fmt::Debug for DebugBoard {
                 write!(f, "{}", i8::from(square.row))?;
             }
             if self.highlighted_squares.contains(&square) {
-                write!(f, "\x1B[31m",)?;
+                write!(f, "\x1B[31m")?;
             }
             match self.inner[square] {
                 Some(piece) => write!(f, "{piece} ")?,
                 None => {
                     if square.is_black() {
-                        write!(f, "□ ",)?;
+                        write!(f, "□ ")?;
                     } else {
-                        write!(f, "■ ",)?;
+                        write!(f, "■ ")?;
                     }
                 }
             }
             if self.highlighted_squares.contains(&square) {
-                write!(f, "\x1B[0m",)?;
+                write!(f, "\x1B[0m")?;
             }
             if square.col == Col::_8 {
                 writeln!(f)?;
