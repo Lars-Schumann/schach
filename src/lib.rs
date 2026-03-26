@@ -9,19 +9,15 @@
     const_try,
     const_index,
     const_cmp,
-    const_result_trait_fn,
     const_default,
     const_clone,
     derive_const,
-    iter_collect_into,
     ascii_char,
     ascii_char_variants,
     result_option_map_or_default,
     stmt_expr_attributes,
     coroutines,
-    gen_blocks,
-    //maybe not my brightest idea
-    core_intrinsics,
+    gen_blocks
 )]
 #![forbid(unsafe_code)]
 #![no_std]
