@@ -11,9 +11,9 @@ use crate::game::GameResult;
 use crate::game::GameResultKind;
 use crate::game::GameState;
 use crate::game::GameStateCore;
-use crate::game::Ongoing;
+use crate::game::Phase::Ongoing;
+use crate::game::Phase::Terminated;
 use crate::game::StepResult;
-use crate::game::Terminated;
 use crate::mv::KingMove;
 use crate::mv::Move;
 use crate::mv::MoveKind;
@@ -21,11 +21,11 @@ use crate::mv::PawnMove;
 use crate::mv::Threat;
 use crate::piece::PieceKind;
 
-impl GameState<Ongoing> {
+impl GameState<{ Ongoing }> {
     #[must_use]
     pub fn search(self, max_depth: u32, checker: impl Fn(&Self)) -> SearchStats {
-        let mut terminated_games_checkmate: Vec<GameState<Terminated>> = vec![];
-        let mut terminated_games_draw: Vec<GameState<Terminated>> = vec![];
+        let mut terminated_games_checkmate: Vec<GameState<{ Terminated }>> = vec![];
+        let mut terminated_games_draw: Vec<GameState<{ Terminated }>> = vec![];
         let mut continued_games: Vec<Self> = vec![self];
         let mut new_continued_games: Vec<Self> = vec![];
 
@@ -390,7 +390,7 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn owl_checker_move_count(game: &GameState<Ongoing>) {
+    fn owl_checker_move_count(game: &GameState<{ Ongoing }>) {
         let schach_move_count = game.core.legal_moves().count();
         let owl_move_count = owlchess::movegen::legal::gen_all(
             &owlchess::Board::from_fen(game.core.to_fen().as_str()).unwrap(),
@@ -400,7 +400,7 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn owl_checker_depth_1(game: &GameState<Ongoing>) {
+    fn owl_checker_depth_1(game: &GameState<{ Ongoing }>) {
         let schach_all_legals = game.core.legal_moves().collect::<Vec<_>>();
         for mv in &schach_all_legals {
             let schach_move_san = standard_algebraic_notation(game.clone(), *mv);

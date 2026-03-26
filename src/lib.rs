@@ -11,6 +11,7 @@
     const_cmp,
     const_default,
     const_clone,
+    adt_const_params,
     derive_const,
     ascii_char,
     ascii_char_variants,

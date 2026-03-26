@@ -5,6 +5,9 @@ use core::ops::Index;
 use core::ops::IndexMut;
 use core::ops::Not::not;
 
+use Phase::Ongoing;
+use Phase::Terminated;
+
 use crate::board::Board;
 use crate::coord::Square;
 use crate::mv::Move;
@@ -51,7 +54,7 @@ impl GameResultKind {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct GameResult {
     pub kind: GameResultKind,
-    pub final_game_state: GameState<Terminated>,
+    pub final_game_state: GameState<{ Terminated }>,
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
@@ -60,7 +63,7 @@ pub struct GameResult {
 //     Terminated(GameResult),
 // }
 
-pub type StepResult = ControlFlow<GameResult, GameState<Ongoing>>;
+pub type StepResult = ControlFlow<GameResult, GameState<{ Ongoing }>>;
 
 #[derive_const(Default, Clone, PartialEq, Eq)]
 #[derive(Debug, Copy, Hash)]
@@ -229,36 +232,30 @@ impl GameStateCore {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Ongoing;
+#[derive(core::marker::ConstParamTy, PartialEq, Eq)]
+pub enum Phase {
+    Ongoing,
+    Terminated,
+}
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Terminated;
-pub trait Phase {}
-
-impl Phase for Ongoing {}
-impl Phase for Terminated {}
-
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct GameState<P: Phase> {
+pub struct GameState<const P: Phase> {
     pub core: GameStateCore,
     pub position_history: Vec<Position>,
     pub rule_set: RuleSet,
-    phase: core::marker::PhantomData<P>,
 }
 
-impl GameState<Ongoing> {
+impl GameState<{ Phase::Ongoing }> {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
-    fn terminated(self) -> GameState<Terminated> {
-        GameState::<Terminated> {
+    fn terminated(self) -> GameState<{ Terminated }> {
+        GameState::<{ Terminated }> {
             core: self.core,
             position_history: self.position_history,
             rule_set: self.rule_set,
-            phase: core::marker::PhantomData::<Terminated>,
         }
     }
 
