@@ -133,7 +133,7 @@ impl CastlingRights {
     #[must_use]
     fn from_fen_repr(value: &[AsciiChar]) -> Self {
         if value == [AsciiChar::HyphenMinus] {
-            return Self::none_available();
+            return Self::NONE_AVAILABLE;
         }
         Self {
             white_kingside: value.contains(&AsciiChar::CapitalK).into(), // `K`
@@ -145,7 +145,7 @@ impl CastlingRights {
 
     #[must_use]
     fn to_fen_repr(self) -> Vec<AsciiChar> {
-        if self == Self::none_available() {
+        if self == Self::NONE_AVAILABLE {
             return vec![AsciiChar::HyphenMinus];
         }
         let mut out = vec![];
@@ -321,7 +321,7 @@ impl Board {
             .map(Board)
             .map_err(|_| BoardFromFenError::IllegalColDimensions)?;
 
-        let mut new_board = Self::empty();
+        let mut new_board = Self::EMPTY;
 
         //TODO: un-fuck this
         for square in Square::ALL {

@@ -15,10 +15,7 @@ pub const ROW_COUNT: usize = 8;
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Board(pub [[Option<Piece>; ROW_COUNT]; COL_COUNT]);
 impl Board {
-    #[must_use]
-    pub const fn empty() -> Self {
-        Self([[None; ROW_COUNT]; COL_COUNT])
-    }
+    pub const EMPTY: Self = Self([[None; ROW_COUNT]; COL_COUNT]);
 
     pub(crate) fn threatening_moves_by(
         &self,
@@ -60,13 +57,11 @@ impl Board {
         self[start] = None;
     }
 
-    #[must_use]
-    pub const fn new() -> Self {
-        #[allow(clippy::wildcard_imports)]
+    pub const NEW: Self = const {
         use crate::coord::Square as S;
         use crate::piece::Piece as P;
 
-        let mut board = Self::empty();
+        let mut board = Self::EMPTY;
 
         board[S::A1] = Some(P::WHITE_ROOK);
         board[S::B1] = Some(P::WHITE_KNIGHT);
@@ -105,7 +100,7 @@ impl Board {
         board[S::H7] = Some(P::BLACK_PAWN);
 
         board
-    }
+    };
 
     #[must_use]
     pub(crate) fn piece_counts(&self) -> PieceCounts {
@@ -120,7 +115,7 @@ impl Board {
 }
 impl const Default for Board {
     fn default() -> Self {
-        Self::new()
+        Self::NEW
     }
 }
 impl const core::ops::Index<Square> for Board {

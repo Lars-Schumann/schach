@@ -147,14 +147,12 @@ impl IndexMut<Piece> for PieceCounts {
 pub struct FullMoveCount(pub NonZeroU64); // non-zero & unsigned because this always starts at 1 and cant decrease 
 impl const Default for FullMoveCount {
     fn default() -> Self {
-        Self::new()
+        Self::NEW
     }
 }
 impl FullMoveCount {
-    #[must_use]
-    pub const fn new() -> Self {
-        const { Self(NonZeroU64::new(1).expect("1 to not be 0")) }
-    }
+    pub const NEW: Self = const { Self(NonZeroU64::new(1).expect("1 to not be 0")) };
+
     pub const fn increase(&mut self) {
         self.0 = self
             .0
@@ -452,25 +450,20 @@ impl CastlingRights {
             black_queenside,
         }
     }
-    #[must_use]
-    pub const fn all_available() -> Self {
-        Self::new(
-            CastlingRight::Available,
-            CastlingRight::Available,
-            CastlingRight::Available,
-            CastlingRight::Available,
-        )
-    }
 
-    #[must_use]
-    pub const fn none_available() -> Self {
-        Self::new(
-            CastlingRight::Unavailable,
-            CastlingRight::Unavailable,
-            CastlingRight::Unavailable,
-            CastlingRight::Unavailable,
-        )
-    }
+    pub const ALL_AVAILABLE: Self = Self::new(
+        CastlingRight::Available,
+        CastlingRight::Available,
+        CastlingRight::Available,
+        CastlingRight::Available,
+    );
+
+    pub const NONE_AVAILABLE: Self = Self::new(
+        CastlingRight::Unavailable,
+        CastlingRight::Unavailable,
+        CastlingRight::Unavailable,
+        CastlingRight::Unavailable,
+    );
 
     pub const ALL: [Self; 16] = [
         Self::new(O, O, O, O),
@@ -496,7 +489,7 @@ const O: CastlingRight = CastlingRight::Unavailable;
 
 impl const Default for CastlingRights {
     fn default() -> Self {
-        Self::all_available()
+        Self::ALL_AVAILABLE
     }
 }
 
