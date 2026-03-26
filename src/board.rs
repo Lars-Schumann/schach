@@ -19,47 +19,7 @@ pub struct Board(pub [[Option<Piece>; ROW_COUNT]; COL_COUNT]);
 impl Board {
     pub const EMPTY: Self = Self([[None; ROW_COUNT]; COL_COUNT]);
 
-    pub(crate) fn threatening_moves_by(
-        &self,
-        threatened_by: PlayerKind,
-    ) -> impl Iterator<Item = Threat> {
-        Square::ALL
-            .iter()
-            .flat_map(move |square| crate::game::attacked_squares(self, *square, threatened_by))
-    }
-
-    pub fn threatened_squares_by(&self, threatened_by: PlayerKind) -> impl Iterator<Item = Square> {
-        Square::ALL.iter().flat_map(move |square| {
-            attacked_squares(self, *square, threatened_by).map(|threat| threat.destination)
-        })
-    }
-
-    #[must_use]
-    pub fn king_position(&self, king_owner: PlayerKind) -> Square {
-        *Square::ALL
-            .iter()
-            .find(|square| {
-                self[**square]
-                    == Some(Piece {
-                        kind: PieceKind::King,
-                        owner: king_owner,
-                    })
-            })
-            .expect("where did the king go?")
-    }
-
-    #[must_use]
-    pub fn is_king_checked(&self, king_owner: PlayerKind) -> bool {
-        self.threatened_squares_by(king_owner.opponent())
-            .any(|square| square == self.king_position(king_owner))
-    }
-
-    pub const fn mov(&mut self, start: Square, target: Square) {
-        self[target] = self[start];
-        self[start] = None;
-    }
-
-    pub const NEW: Self = const {
+    pub const STARTING_POSITION: Self = const {
         use crate::coord::Square as S;
         use crate::piece::Piece as P;
 
@@ -104,6 +64,46 @@ impl Board {
         board
     };
 
+    pub(crate) fn threatening_moves_by(
+        &self,
+        threatened_by: PlayerKind,
+    ) -> impl Iterator<Item = Threat> {
+        Square::ALL
+            .iter()
+            .flat_map(move |square| crate::game::attacked_squares(self, *square, threatened_by))
+    }
+
+    pub fn threatened_squares_by(&self, threatened_by: PlayerKind) -> impl Iterator<Item = Square> {
+        Square::ALL.iter().flat_map(move |square| {
+            attacked_squares(self, *square, threatened_by).map(|threat| threat.destination)
+        })
+    }
+
+    #[must_use]
+    pub fn king_position(&self, king_owner: PlayerKind) -> Square {
+        *Square::ALL
+            .iter()
+            .find(|square| {
+                self[**square]
+                    == Some(Piece {
+                        kind: PieceKind::King,
+                        owner: king_owner,
+                    })
+            })
+            .expect("where did the king go?")
+    }
+
+    #[must_use]
+    pub fn is_king_checked(&self, king_owner: PlayerKind) -> bool {
+        self.threatened_squares_by(king_owner.opponent())
+            .any(|square| square == self.king_position(king_owner))
+    }
+
+    pub const fn mov(&mut self, start: Square, target: Square) {
+        self[target] = self[start];
+        self[start] = None;
+    }
+
     #[must_use]
     pub(crate) fn piece_counts(&self) -> PieceCounts {
         let mut piece_counts = PieceCounts::default();
@@ -117,7 +117,7 @@ impl Board {
 }
 impl const Default for Board {
     fn default() -> Self {
-        Self::NEW
+        Self::STARTING_POSITION
     }
 }
 impl const Index<Square> for Board {

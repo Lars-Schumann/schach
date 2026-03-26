@@ -1,6 +1,3 @@
-use alloc::vec;
-use alloc::vec::Vec;
-
 use crate::coord::Offset;
 use crate::coord::Row;
 use crate::coord::Square as S;
