@@ -52,16 +52,12 @@ impl PlayerKind {
     }
 
     #[must_use]
-    pub(crate) fn castling_free_needed_squares(self, castling_side: CS) -> Vec<Square> {
+    pub(crate) const fn castling_free_needed_squares(self, castling_side: CS) -> &'static [Square] {
         match (self, castling_side) {
-            (Self::White, CS::Kingside) => vec![S::F1, S::G1],
-            (Self::White, CS::Queenside) => {
-                vec![S::D1, S::C1, S::B1]
-            }
-            (Self::Black, CS::Kingside) => vec![S::F8, S::G8],
-            (Self::Black, CS::Queenside) => {
-                vec![S::D8, S::C8, S::B8]
-            }
+            (Self::White, CS::Kingside) => &[S::F1, S::G1],
+            (Self::White, CS::Queenside) => &[S::D1, S::C1, S::B1],
+            (Self::Black, CS::Kingside) => &[S::F8, S::G8],
+            (Self::Black, CS::Queenside) => &[S::D8, S::C8, S::B8],
         }
     }
 
