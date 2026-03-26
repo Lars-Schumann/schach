@@ -17,7 +17,8 @@
     result_option_map_or_default,
     stmt_expr_attributes,
     coroutines,
-    gen_blocks
+    gen_blocks,
+    import_trait_associated_functions
 )]
 #![forbid(unsafe_code)]
 #![no_std]

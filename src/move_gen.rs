@@ -1,9 +1,11 @@
 use alloc::vec;
 use alloc::vec::Vec;
 use core::ops::Not;
+use core::ops::Not::not;
 
 use crate::board::Board;
 use crate::coord::Square;
+use crate::game::CastlingRight;
 use crate::game::CastlingSide;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
@@ -106,14 +108,13 @@ impl GameStateCore {
 
     gen fn castle_candidates(&self) -> Move {
         for castling_side in CastlingSide::ALL {
-            if self.has_castling_right(castling_side).not() {
+            if self.castling_rights[(self.active_player, castling_side)]
+                == CastlingRight::Unavailable
+            {
                 continue;
             }
 
-            if self
-                .are_castle_squares_free_from_checks_and_pieces(castling_side)
-                .not()
-            {
+            if not(self.are_castle_squares_free_from_checks_and_pieces(castling_side)) {
                 continue;
             }
 

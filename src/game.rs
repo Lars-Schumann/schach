@@ -3,7 +3,7 @@ use core::num::NonZeroU64;
 use core::ops::ControlFlow;
 use core::ops::Index;
 use core::ops::IndexMut;
-use core::ops::Not;
+use core::ops::Not::not;
 
 use crate::board::Board;
 use crate::coord::Square;
@@ -201,19 +201,6 @@ impl GameStateCore {
         self
     }
 
-    #[must_use]
-    pub(crate) const fn has_castling_right(&self, castling_side: CastlingSide) -> bool {
-        self.castling_rights[(self.active_player, castling_side)]
-    }
-
-    pub(crate) const fn deny_castling(
-        &mut self,
-        for_player: PlayerKind,
-        castling_side: CastlingSide,
-    ) {
-        self.castling_rights[(for_player, castling_side)] = false;
-    }
-
     //TODO: better name
     pub(crate) fn are_castle_squares_free_from_checks_and_pieces(
         &self,
@@ -300,16 +287,16 @@ impl GameState<Ongoing> {
         // handle our own castling rights
         match mv.kind {
             MoveKind::King(_) => {
-                game.core
-                    .deny_castling(game.core.active_player, CastlingSide::Kingside);
-                game.core
-                    .deny_castling(game.core.active_player, CastlingSide::Queenside);
+                for castling_side in CastlingSide::ALL {
+                    game.core.castling_rights[(game.core.active_player, castling_side)] =
+                        CastlingRight::Unavailable;
+                }
             }
             MoveKind::Rook { .. } => {
-                for castling_side in [CastlingSide::Kingside, CastlingSide::Queenside] {
+                for castling_side in CastlingSide::ALL {
                     if mv.origin == game.core.active_player.rook_start(castling_side) {
-                        game.core
-                            .deny_castling(game.core.active_player, castling_side);
+                        game.core.castling_rights[(game.core.active_player, castling_side)] =
+                            CastlingRight::Unavailable;
                     }
                 }
             }
@@ -317,11 +304,12 @@ impl GameState<Ongoing> {
         }
 
         // handle opponents castling rights
-        if mv.is_capture() && mv.kind.is_pawn_en_passant().not() {
+        if mv.is_capture() && not(mv.kind.is_pawn_en_passant()) {
             for castling_side in CastlingSide::ALL {
                 if mv.destination == game.core.active_player.opponent().rook_start(castling_side) {
-                    game.core
-                        .deny_castling(game.core.active_player.opponent(), castling_side);
+                    game.core.castling_rights
+                        [(game.core.active_player.opponent(), castling_side)] =
+                        CastlingRight::Unavailable;
                 }
             }
         }
@@ -415,22 +403,47 @@ impl GameState<Ongoing> {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum CastlingRight {
+    Available,
+    Unavailable,
+}
+
+impl const From<bool> for CastlingRight {
+    fn from(value: bool) -> Self {
+        #[expect(clippy::match_bool)]
+        match value {
+            true => Self::Available,
+            false => Self::Unavailable,
+        }
+    }
+}
+
+impl const From<CastlingRight> for bool {
+    fn from(value: CastlingRight) -> Self {
+        match value {
+            CastlingRight::Available => true,
+            CastlingRight::Unavailable => false,
+        }
+    }
+}
+
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct CastlingRights {
-    pub white_kingside: bool,
-    pub white_queenside: bool,
-    pub black_kingside: bool,
-    pub black_queenside: bool,
+    pub white_kingside: CastlingRight,
+    pub white_queenside: CastlingRight,
+    pub black_kingside: CastlingRight,
+    pub black_queenside: CastlingRight,
 }
 impl CastlingRights {
     #[must_use]
     #[allow(clippy::fn_params_excessive_bools)]
     pub const fn new(
-        white_kingside: bool,
-        white_queenside: bool,
-        black_kingside: bool,
-        black_queenside: bool,
+        white_kingside: CastlingRight,
+        white_queenside: CastlingRight,
+        black_kingside: CastlingRight,
+        black_queenside: CastlingRight,
     ) -> Self {
         Self {
             white_kingside,
@@ -441,12 +454,22 @@ impl CastlingRights {
     }
     #[must_use]
     pub const fn all_available() -> Self {
-        Self::new(true, true, true, true)
+        Self::new(
+            CastlingRight::Available,
+            CastlingRight::Available,
+            CastlingRight::Available,
+            CastlingRight::Available,
+        )
     }
 
     #[must_use]
     pub const fn none_available() -> Self {
-        Self::new(false, false, false, false)
+        Self::new(
+            CastlingRight::Unavailable,
+            CastlingRight::Unavailable,
+            CastlingRight::Unavailable,
+            CastlingRight::Unavailable,
+        )
     }
 
     pub const ALL: [Self; 16] = [
@@ -468,8 +491,8 @@ impl CastlingRights {
         Self::new(X, X, X, X),
     ];
 }
-const X: bool = true;
-const O: bool = false;
+const X: CastlingRight = CastlingRight::Available;
+const O: CastlingRight = CastlingRight::Unavailable;
 
 impl const Default for CastlingRights {
     fn default() -> Self {
@@ -478,7 +501,7 @@ impl const Default for CastlingRights {
 }
 
 impl const Index<(PlayerKind, CastlingSide)> for CastlingRights {
-    type Output = bool;
+    type Output = CastlingRight;
 
     fn index(&self, (player, castling_side): (PlayerKind, CastlingSide)) -> &Self::Output {
         match (player, castling_side) {

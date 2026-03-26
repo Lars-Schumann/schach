@@ -11,6 +11,7 @@ use crate::coord::Row;
 use crate::coord::RowIndexOutOfRange;
 use crate::coord::Square;
 use crate::coord::SquareOutOfRange;
+use crate::game::CastlingRight;
 use crate::game::CastlingRights;
 use crate::game::FiftyMoveRuleClock;
 use crate::game::FullMoveCount;
@@ -135,10 +136,10 @@ impl CastlingRights {
             return Self::none_available();
         }
         Self {
-            white_kingside: value.contains(&AsciiChar::CapitalK), // `K`
-            white_queenside: value.contains(&AsciiChar::CapitalQ), // `Q`
-            black_kingside: value.contains(&AsciiChar::SmallK),   // `k`
-            black_queenside: value.contains(&AsciiChar::SmallQ),  // `q`
+            white_kingside: value.contains(&AsciiChar::CapitalK).into(), // `K`
+            white_queenside: value.contains(&AsciiChar::CapitalQ).into(), // `Q`
+            black_kingside: value.contains(&AsciiChar::SmallK).into(),   // `k`
+            black_queenside: value.contains(&AsciiChar::SmallQ).into(),  // `q`
         }
     }
 
@@ -148,16 +149,16 @@ impl CastlingRights {
             return vec![AsciiChar::HyphenMinus];
         }
         let mut out = vec![];
-        if self.white_kingside {
+        if self.white_kingside == CastlingRight::Available {
             out.push(AsciiChar::CapitalK);
         }
-        if self.white_queenside {
+        if self.white_queenside == CastlingRight::Available {
             out.push(AsciiChar::CapitalQ);
         }
-        if self.black_kingside {
+        if self.black_kingside == CastlingRight::Available {
             out.push(AsciiChar::SmallK);
         }
-        if self.black_queenside {
+        if self.black_queenside == CastlingRight::Available {
             out.push(AsciiChar::SmallQ);
         }
         assert!(!out.is_empty());
