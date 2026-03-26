@@ -265,14 +265,14 @@ impl GameStateCore {
 }
 
 impl Board {
-    pub const fn apply_move(&mut self, m: Move) {
-        *self = self.with_move_applied(m);
+    pub const fn apply_move(&mut self, mv: Move) {
+        *self = self.with_move_applied(mv);
     }
 
     #[must_use]
-    pub const fn with_move_applied(mut self, m: Move) -> Self {
-        self.mov(m.origin, m.destination);
-        match m.kind {
+    pub const fn with_move_applied(mut self, mv: Move) -> Self {
+        self.mov(mv.origin, mv.destination);
+        match mv.kind {
             | MoveKind::Pawn(
                 PawnMove::SingleStep {
                     promotion_replacement: None,
@@ -300,7 +300,7 @@ impl Board {
                     promotion_replacement: Some(replacement),
                 },
             ) => {
-                self[m.destination] = Some(replacement);
+                self[mv.destination] = Some(replacement);
             }
 
             MoveKind::King(KingMove::Castle {
