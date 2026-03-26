@@ -1,4 +1,6 @@
 use alloc::vec::Vec;
+use core::ops::Index;
+use core::ops::IndexMut;
 
 use crate::coord::Col;
 use crate::coord::Square;
@@ -118,7 +120,7 @@ impl const Default for Board {
         Self::NEW
     }
 }
-impl const core::ops::Index<Square> for Board {
+impl const Index<Square> for Board {
     type Output = Option<Piece>;
     fn index(&self, index: Square) -> &Self::Output {
         let col = usize::from(u8::from(index.col) - 1);
@@ -126,7 +128,7 @@ impl const core::ops::Index<Square> for Board {
         &self.0[col][row]
     }
 }
-impl const core::ops::IndexMut<Square> for Board {
+impl const IndexMut<Square> for Board {
     fn index_mut(&mut self, index: Square) -> &mut Self::Output {
         let col = usize::from(u8::from(index.col) - 1);
         let row = usize::from(u8::from(index.row) - 1);

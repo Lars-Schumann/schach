@@ -1,4 +1,6 @@
+use core::ops::Add;
 use core::ops::Not;
+use core::ops::Mul;
 
 use crate::board::COL_COUNT;
 use crate::board::ROW_COUNT;
@@ -166,14 +168,14 @@ impl Row {
         Self::_8,
     ];
 }
-impl const core::ops::Add<i32> for Row {
+impl const Add<i32> for Row {
     type Output = Result<Self, RowIndexOutOfRange>;
     fn add(self, rhs: i32) -> Self::Output {
         let row_number: i32 = self.into();
         (row_number + rhs).try_into()
     }
 }
-impl const core::ops::Add<i32> for Col {
+impl const Add<i32> for Col {
     type Output = Result<Self, ColIndexOutOfRange>;
     fn add(self, rhs: i32) -> Self::Output {
         let column_number: i32 = self.into();
@@ -343,7 +345,7 @@ impl Offset {
     ];
 }
 
-impl const core::ops::Add for Offset {
+impl const Add for Offset {
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
         Self {
@@ -352,7 +354,7 @@ impl const core::ops::Add for Offset {
         }
     }
 }
-impl const core::ops::Mul<i32> for Offset {
+impl const Mul<i32> for Offset {
     type Output = Self;
     fn mul(self, rhs: i32) -> Self::Output {
         Self {
@@ -377,7 +379,7 @@ impl const From<RowIndexOutOfRange> for SquareOutOfRange {
         Self::Row(value)
     }
 }
-impl const core::ops::Add<Offset> for Square {
+impl const Add<Offset> for Square {
     type Output = Result<Self, SquareOutOfRange>;
     fn add(self, rhs: Offset) -> Self::Output {
         Ok(Self {

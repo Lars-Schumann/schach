@@ -99,7 +99,7 @@ impl PieceCounts {
         ..Default::default()
     };
 }
-impl Index<Piece> for PieceCounts {
+impl const Index<Piece> for PieceCounts {
     type Output = u8;
 
     fn index(&self, index: Piece) -> &Self::Output {
