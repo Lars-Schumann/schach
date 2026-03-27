@@ -149,7 +149,7 @@ pub fn lan(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
 }
 
 #[must_use]
-pub fn san(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
+pub fn san(mv: Move, game: GameState<{ Ongoing }>) -> Vec<AsciiChar> {
     let capture_repr = CaptureRepresentation {
         capture: Some(AsciiChar::SmallX),
         no_capture: None,
@@ -158,20 +158,20 @@ pub fn san(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
 
     let mov_index = legal_moves
         .iter()
-        .position(|m| *m == mov)
+        .position(|m| *m == mv)
         .expect("passed illegal move");
 
     legal_moves.swap_remove(mov_index);
 
     let interfering_moves = legal_moves
         .iter()
-        .filter(|legal| legal.kind.piece_kind() == mov.kind.piece_kind())
-        .filter(|legal| legal.destination == mov.destination)
+        .filter(|legal| legal.kind.piece_kind() == mv.kind.piece_kind())
+        .filter(|legal| legal.destination == mv.destination)
         .filter(|legal| {
             // for the Promotion case, remove Duplicate Promotions to just different pieces.
-            if mov.kind.is_promotion()
-                && legal.origin == mov.origin
-                && legal.destination == mov.destination
+            if mv.kind.is_promotion()
+                && legal.origin == mv.origin
+                && legal.destination == mv.destination
             {
                 return false;
             }
@@ -180,28 +180,28 @@ pub fn san(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
         .collect::<Vec<_>>();
 
     if interfering_moves.is_empty() {
-        if mov.kind.piece_kind() == PieceKind::Pawn && mov.is_capture() {
+        if mv.kind.piece_kind() == PieceKind::Pawn && mv.is_capture() {
             //Pawns always have the File when capturing!
-            return notation_creator(game, mov, OriginAmbiguationLevel::FileOnly, capture_repr);
+            return notation_creator(game, mv, OriginAmbiguationLevel::FileOnly, capture_repr);
         }
-        return notation_creator(game, mov, OriginAmbiguationLevel::Empty, capture_repr);
+        return notation_creator(game, mv, OriginAmbiguationLevel::Empty, capture_repr);
     }
 
     if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.row == mov.origin.row))
+        .any(|inter| inter.origin.row == mv.origin.row))
     {
-        return notation_creator(game, mov, OriginAmbiguationLevel::RankOnly, capture_repr);
+        return notation_creator(game, mv, OriginAmbiguationLevel::RankOnly, capture_repr);
     }
 
     if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.col == mov.origin.col))
+        .any(|inter| inter.origin.col == mv.origin.col))
     {
-        return notation_creator(game, mov, OriginAmbiguationLevel::FileOnly, capture_repr);
+        return notation_creator(game, mv, OriginAmbiguationLevel::FileOnly, capture_repr);
     }
 
-    notation_creator(game, mov, OriginAmbiguationLevel::Full, capture_repr)
+    notation_creator(game, mv, OriginAmbiguationLevel::Full, capture_repr)
 }
 #[cfg(test)]
 mod tests {
@@ -212,13 +212,17 @@ mod tests {
     #[test]
     fn test_thingy() {
         let game = GameState::INITIAL;
-        let game2 =
-            GameState::try_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-                .unwrap();
+        //let game = GameState::try_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
 
         let legal_moves = game.core.legal_moves();
+
         for mv in legal_moves {
-            println!("{:?}", san(game.clone(), mv));
+            match game.clone().step(mv) {
+                StepResult::Continue(game) => {
+                    println!("Move: {:?} results in {game:?}", san(mv, game.clone()));
+                }
+                StepResult::Break(game_result) => panic!(),
+            }
         }
     }
 }
