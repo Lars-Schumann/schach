@@ -3,23 +3,23 @@
 #![allow(clippy::missing_panics_doc)]
 #![cfg_attr(not(test), deny(clippy::unwrap_used))]
 #![feature(
-    const_trait_impl,
-    const_ops,
-    const_convert,
-    const_try,
-    const_index,
-    const_cmp,
-    const_default,
-    const_clone,
     adt_const_params,
-    derive_const,
     ascii_char,
     ascii_char_variants,
-    result_option_map_or_default,
-    stmt_expr_attributes,
+    const_clone,
+    const_cmp,
+    const_convert,
+    const_default,
+    const_index,
+    const_trait_impl,
+    const_try,
+    const_ops,
     coroutines,
+    derive_const,
     gen_blocks,
-    import_trait_associated_functions
+    import_trait_associated_functions,
+    result_option_map_or_default,
+    stmt_expr_attributes
 )]
 #![forbid(unsafe_code)]
 #![no_std]
