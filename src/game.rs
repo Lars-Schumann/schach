@@ -150,11 +150,11 @@ impl IndexMut<Piece> for PieceCounts {
 pub struct FullMoveCount(pub NonZeroU64); // non-zero & unsigned because this always starts at 1 and cant decrease 
 impl const Default for FullMoveCount {
     fn default() -> Self {
-        Self::NEW
+        Self::INITIAL
     }
 }
 impl FullMoveCount {
-    pub const NEW: Self = const { Self(NonZeroU64::new(1).expect("1 to not be 0")) };
+    pub const INITIAL: Self = const { Self(NonZeroU64::new(1).expect("1 to not be 0")) };
 
     pub const fn increase(&mut self) {
         self.0 = self
@@ -251,10 +251,7 @@ pub struct GameState<const P: Phase> {
 }
 
 impl GameState<{ Phase::Ongoing }> {
-    #[must_use]
-    pub const fn new() -> Self {
-        Self::default()
-    }
+    pub const INITIAL: Self = Self::default();
 
     fn terminated(self) -> GameState<{ Terminated }> {
         GameState::<{ Terminated }> {

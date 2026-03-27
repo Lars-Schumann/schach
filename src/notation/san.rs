@@ -212,7 +212,7 @@ mod tests {
 
     #[test]
     fn test_thingy() {
-        let game = GameState::new();
+        let game = GameState::INITIAL;
         let legal_moves = game.core.legal_moves();
         for mv in legal_moves {
             println!("{:?}", standard_algebraic_notation(game.clone(), mv));
