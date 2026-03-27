@@ -8,8 +8,8 @@ use self::Square as S;
 use self::Col as C;
 use self::Row as R;
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone, Hash)]
+#[derive(Debug, Copy,  Hash)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub struct Square {
     pub col: Col,
     pub row: Row,

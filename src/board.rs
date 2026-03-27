@@ -14,7 +14,8 @@ use crate::player::PlayerKind;
 pub const COL_COUNT: usize = 8;
 pub const ROW_COUNT: usize = 8;
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub struct Board(pub [[Option<Piece>; ROW_COUNT]; COL_COUNT]);
 impl Board {
     pub const EMPTY: Self = Self([[None; ROW_COUNT]; COL_COUNT]);

@@ -19,8 +19,8 @@ use crate::player::PlayerKind;
 pub(crate) static REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
 pub(crate) static FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Debug, Copy)]
 pub enum CastlingSide {
     Kingside,
     Queenside,
@@ -51,7 +51,7 @@ impl GameResultKind {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GameResult {
     pub kind: GameResultKind,
     pub final_game_state: GameState<{ Terminated }>,
@@ -164,7 +164,8 @@ impl FullMoveCount {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Copy)]
+#[derive_const(Clone, PartialEq, Eq, Default)]
 pub struct FiftyMoveRuleClock(pub u64);
 impl FiftyMoveRuleClock {
     #[must_use]
@@ -179,14 +180,16 @@ impl FiftyMoveRuleClock {
     }
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Copy, Debug)]
+#[derive_const(Clone, PartialEq, Eq, Default)]
 pub enum RuleSet {
     #[default]
     Standard,
     Perft,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Copy)]
+#[derive_const(Clone, PartialEq, Eq, Default)]
 pub struct GameStateCore {
     pub board: Board,
     pub fifty_move_rule_clock: FiftyMoveRuleClock,
@@ -232,13 +235,15 @@ impl GameStateCore {
     }
 }
 
-#[derive(core::marker::ConstParamTy, PartialEq, Eq)]
+#[derive(core::marker::ConstParamTy)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub enum Phase {
     Ongoing,
     Terminated,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive_const(Default)]
 pub struct GameState<const P: Phase> {
     pub core: GameStateCore,
     pub position_history: Vec<Position>,
@@ -247,7 +252,7 @@ pub struct GameState<const P: Phase> {
 
 impl GameState<{ Phase::Ongoing }> {
     #[must_use]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self::default()
     }
 
@@ -398,7 +403,8 @@ impl GameState<{ Phase::Ongoing }> {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub enum CastlingRight {
     Available,
     Unavailable,
@@ -424,7 +430,8 @@ impl const From<CastlingRight> for bool {
 }
 
 #[allow(clippy::struct_excessive_bools)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub struct CastlingRights {
     pub white_kingside: CastlingRight,
     pub white_queenside: CastlingRight,
@@ -517,7 +524,8 @@ impl const IndexMut<(PlayerKind, CastlingSide)> for CastlingRights {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
+#[derive_const(Clone, PartialEq, Eq)]
 pub struct Position {
     pub board: Board,
     pub castling_rights: CastlingRights,
