@@ -45,6 +45,11 @@ impl MoveKind {
     }
 
     #[must_use]
+    pub const fn is_pawn(&self) -> bool {
+        matches!(self, Self::Pawn(_))
+    }
+
+    #[must_use]
     pub const fn is_pawn_double_step(&self) -> bool {
         self == &Self::Pawn(PawnMove::DoubleStep)
     }
