@@ -24,7 +24,7 @@ for mv in legal_moves {
         StepResult::Continue(next_game) => {
           println!("Move: {:?} results in {next_game:?}", san(mv, game.clone()));
         }
-        StepResult::Break(game_result) => {}
+        StepResult::Break(_game_result) => {}
     }
 }
 ```
