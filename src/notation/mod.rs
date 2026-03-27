@@ -1,2 +1,2 @@
 pub mod fen;
-pub mod san;
+pub mod algebraic;

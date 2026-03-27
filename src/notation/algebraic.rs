@@ -136,7 +136,7 @@ fn notation_creator(
 }
 
 #[must_use]
-pub fn long_algebraic_notation(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
+pub fn lan(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
     notation_creator(
         game,
         mov,
@@ -149,7 +149,7 @@ pub fn long_algebraic_notation(game: GameState<{ Ongoing }>, mov: Move) -> Vec<A
 }
 
 #[must_use]
-pub fn standard_algebraic_notation(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
+pub fn san(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
     let capture_repr = CaptureRepresentation {
         capture: Some(AsciiChar::SmallX),
         no_capture: None,
@@ -212,9 +212,13 @@ mod tests {
     #[test]
     fn test_thingy() {
         let game = GameState::INITIAL;
+        let game2 =
+            GameState::try_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+                .unwrap();
+
         let legal_moves = game.core.legal_moves();
         for mv in legal_moves {
-            println!("{:?}", standard_algebraic_notation(game.clone(), mv));
+            println!("{:?}", san(game.clone(), mv));
         }
     }
 }

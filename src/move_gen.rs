@@ -328,7 +328,7 @@ mod tests {
     use std::println;
 
     use super::*;
-    use crate::notation::san::standard_algebraic_notation;
+    use crate::notation::algebraic::san;
     use crate::testing::skip_if_no_expensive_test_opt_in;
 
     #[test]
@@ -403,7 +403,7 @@ mod tests {
     fn owl_checker_depth_1(game: &GameState<{ Ongoing }>) {
         let schach_all_legals = game.core.legal_moves().collect::<Vec<_>>();
         for mv in &schach_all_legals {
-            let schach_move_san = standard_algebraic_notation(game.clone(), *mv);
+            let schach_move_san = san(game.clone(), *mv);
             let owl_board = owlchess::Board::from_fen(game.core.to_fen().as_str()).unwrap();
             let owl_move = owlchess::Move::from_san(schach_move_san.as_str(), &owl_board).unwrap();
 
@@ -430,10 +430,7 @@ mod tests {
                 println!();
                 println!("schach moves: {new_schach_move_count}");
                 for mv in new_schach_moves {
-                    println!(
-                        "{}",
-                        standard_algebraic_notation(new_schach_board.clone(), mv).as_str()
-                    );
+                    println!("{}", san(new_schach_board.clone(), mv).as_str());
                 }
                 println!("owlchs moves: {new_owl_move_count}");
                 for mv in &new_owl_moves {

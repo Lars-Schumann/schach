@@ -13,6 +13,7 @@ use crate::coord::Square;
 use crate::mv::Move;
 use crate::mv::MoveKind;
 use crate::mv::Threat;
+use crate::notation::fen::GameFromFenError;
 use crate::piece::Piece;
 use crate::player::PlayerKind;
 
@@ -262,11 +263,15 @@ impl GameState<{ Phase::Ongoing }> {
     }
 
     #[must_use]
-    pub fn with_core(core: GameStateCore) -> Self {
+    fn with_core(core: GameStateCore) -> Self {
         Self {
             core,
             ..Default::default()
         }
+    }
+
+    pub fn try_from_fen(fen: &str) -> Result<Self, GameFromFenError> {
+        Ok(Self::with_core(GameStateCore::try_from_fen(fen)?))
     }
 
     #[must_use]
