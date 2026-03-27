@@ -2,7 +2,7 @@ Schach
 ===
 A chess simulator, legal move generator, and notation parser with a focus on simplicity and correctness.
 
-`#![no_std]` compatible and `#![forbid_unsafe}]` completely safe.
+`#![no_std]` compatible, `#![forbid_unsafe}]` completely safe and 0 hard dependencies.
 
 This Crate relies on several unstable features, mainly for const Traits and Generators.
 
