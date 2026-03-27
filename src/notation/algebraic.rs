@@ -208,21 +208,4 @@ mod tests {
     use std::println;
 
     use super::*;
-
-    #[test]
-    fn test_thingy() {
-        let game = GameState::INITIAL;
-        //let game = GameState::try_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
-
-        let legal_moves = game.core.legal_moves();
-
-        for mv in legal_moves {
-            match game.clone().step(mv) {
-                StepResult::Continue(game) => {
-                    println!("Move: {:?} results in {game:?}", san(mv, game.clone()));
-                }
-                StepResult::Break(game_result) => panic!(),
-            }
-        }
-    }
 }
