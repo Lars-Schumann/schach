@@ -2,6 +2,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::ascii::Char as AsciiChar;
 use core::ops::Not;
+use core::ops::Not::not;
 
 use crate::game::CastlingSide;
 use crate::game::GameResult;
@@ -65,7 +66,7 @@ fn notation_creator(
         | MoveKind::Rook { .. }
         | MoveKind::Queen { .. }
         | MoveKind::King(KingMove::Normal { .. }) => {
-            let piece_repr = (matches!(mv.kind, MoveKind::Pawn(_))).not().then_some([mv
+            let piece_repr = (mv.kind.is_pawn()).not().then_some([mv
                 .kind
                 .piece_kind()
                 .to_white_piece()
@@ -186,18 +187,16 @@ pub fn standard_algebraic_notation(game: GameState<{ Ongoing }>, mov: Move) -> V
         return notation_creator(game, mov, OriginAmbiguationLevel::Empty, capture_repr);
     }
 
-    if interfering_moves
+    if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.row == mov.origin.row)
-        .not()
+        .any(|inter| inter.origin.row == mov.origin.row))
     {
         return notation_creator(game, mov, OriginAmbiguationLevel::RankOnly, capture_repr);
     }
 
-    if interfering_moves
+    if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.col == mov.origin.col)
-        .not()
+        .any(|inter| inter.origin.col == mov.origin.col))
     {
         return notation_creator(game, mov, OriginAmbiguationLevel::FileOnly, capture_repr);
     }
