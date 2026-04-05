@@ -15,7 +15,7 @@ use schach::game::StepResult;
 fn main() {
     let game = Game::INITIAL;
     // or from a FEN String
-    // let game = GameState::try_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
+    // let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     let legal_moves = game.legal_moves();
 
