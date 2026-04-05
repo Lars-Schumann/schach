@@ -1,3 +1,4 @@
+use alloc::format;
 use alloc::vec::Vec;
 use core::num::NonZeroU64;
 use core::ops::ControlFlow;
@@ -273,6 +274,13 @@ impl Game<{ Phase::Ongoing }> {
 
     pub fn try_from_fen(fen: &str) -> Result<Self, GameFromFenError> {
         Ok(Self::with_core(GameCore::try_from_fen(fen)?))
+    }
+
+    #[must_use]
+    pub fn from_fen(fen: &str) -> Self {
+        Self::with_core(
+            GameCore::try_from_fen(fen).unwrap_or_else(|_| panic!("passed invalid FEN: {fen}")),
+        )
     }
 
     #[must_use]
