@@ -11,9 +11,10 @@ use Phase::Terminated;
 use crate::board::Board;
 use crate::coord::Square;
 use crate::mv::InnerMove;
+use crate::mv::Move;
 use crate::mv::MoveKind;
 use crate::mv::Threat;
-use crate::notation::fen::GameFromFenError;
+use crate::notation::GameFromFenError;
 use crate::piece::Piece;
 use crate::player::PlayerKind;
 
@@ -282,7 +283,7 @@ impl GameState<{ Phase::Ongoing }> {
         }
     }
 
-    pub(crate) fn step(mut self, mv: InnerMove) -> StepResult {
+    fn step(mut self, mv: InnerMove) -> StepResult {
         self.core.board.apply_move(mv);
         let mut game = self;
 
@@ -402,6 +403,12 @@ impl GameState<{ Phase::Ongoing }> {
 
         game.core.active_player = game.core.active_player.opponent();
         StepResult::Continue(game)
+    }
+}
+
+impl Move {
+    pub fn make(self) -> StepResult {
+        self.game.step(self.inner)
     }
 }
 

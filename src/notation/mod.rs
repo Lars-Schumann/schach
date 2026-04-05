@@ -1,2 +1,4 @@
-pub mod fen;
-pub mod algebraic;
+mod fen;
+mod algebraic;
+
+pub use fen::GameFromFenError;

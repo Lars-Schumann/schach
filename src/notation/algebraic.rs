@@ -7,10 +7,7 @@ use core::ops::Not::not;
 use crate::game::CastlingSide;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
-use crate::game::GameState;
-use crate::game::Phase::Ongoing;
 use crate::game::StepResult;
-use crate::mv::InnerMove;
 use crate::mv::KingMove;
 use crate::mv::Move;
 use crate::mv::MoveKind;
@@ -136,73 +133,76 @@ fn notation_creator(
     [core_move_notation, append].concat()
 }
 
-#[must_use]
-pub fn lan(mv: Move) -> Vec<AsciiChar> {
-    notation_creator(
-        mv,
-        OriginAmbiguationLevel::Full,
-        CaptureRepresentation {
+impl Move {
+    #[must_use]
+    pub fn lan(self) -> Vec<AsciiChar> {
+        notation_creator(
+            self,
+            OriginAmbiguationLevel::Full,
+            CaptureRepresentation {
+                capture: Some(AsciiChar::SmallX),
+                no_capture: Some(AsciiChar::HyphenMinus),
+            },
+        )
+    }
+
+    #[must_use]
+    pub fn san(self) -> Vec<AsciiChar> {
+        let capture_repr = CaptureRepresentation {
             capture: Some(AsciiChar::SmallX),
-            no_capture: Some(AsciiChar::HyphenMinus),
-        },
-    )
-}
+            no_capture: None,
+        };
+        let mut legal_moves = self.game.core.legal_inner_moves().collect::<Vec<_>>();
 
-#[must_use]
-pub fn san(mv: Move) -> Vec<AsciiChar> {
-    let capture_repr = CaptureRepresentation {
-        capture: Some(AsciiChar::SmallX),
-        no_capture: None,
-    };
-    let mut legal_moves = mv.game.core.legal_inner_moves().collect::<Vec<_>>();
+        let mov_index = legal_moves
+            .iter()
+            .position(|m| *m == self.inner)
+            .expect("passed illegal move");
 
-    let mov_index = legal_moves
-        .iter()
-        .position(|m| *m == mv.inner)
-        .expect("passed illegal move");
+        legal_moves.swap_remove(mov_index);
 
-    legal_moves.swap_remove(mov_index);
+        let interfering_moves = legal_moves
+            .iter()
+            .filter(|legal| legal.kind.piece_kind() == self.inner.kind.piece_kind())
+            .filter(|legal| legal.destination == self.inner.destination)
+            .filter(|legal| {
+                // for the Promotion case, remove Duplicate Promotions to just different pieces.
+                if self.inner.kind.is_promotion()
+                    && legal.origin == self.inner.origin
+                    && legal.destination == self.inner.destination
+                {
+                    return false;
+                }
+                true
+            })
+            .collect::<Vec<_>>();
 
-    let interfering_moves = legal_moves
-        .iter()
-        .filter(|legal| legal.kind.piece_kind() == mv.inner.kind.piece_kind())
-        .filter(|legal| legal.destination == mv.inner.destination)
-        .filter(|legal| {
-            // for the Promotion case, remove Duplicate Promotions to just different pieces.
-            if mv.inner.kind.is_promotion()
-                && legal.origin == mv.inner.origin
-                && legal.destination == mv.inner.destination
-            {
-                return false;
+        if interfering_moves.is_empty() {
+            if self.inner.kind.piece_kind() == PieceKind::Pawn && self.inner.is_capture() {
+                //Pawns always have the File when capturing!
+                return notation_creator(self, OriginAmbiguationLevel::FileOnly, capture_repr);
             }
-            true
-        })
-        .collect::<Vec<_>>();
-
-    if interfering_moves.is_empty() {
-        if mv.inner.kind.piece_kind() == PieceKind::Pawn && mv.inner.is_capture() {
-            //Pawns always have the File when capturing!
-            return notation_creator(mv, OriginAmbiguationLevel::FileOnly, capture_repr);
+            return notation_creator(self, OriginAmbiguationLevel::Empty, capture_repr);
         }
-        return notation_creator(mv, OriginAmbiguationLevel::Empty, capture_repr);
-    }
 
-    if not(interfering_moves
-        .iter()
-        .any(|inter| inter.origin.row == mv.inner.origin.row))
-    {
-        return notation_creator(mv, OriginAmbiguationLevel::RankOnly, capture_repr);
-    }
+        if not(interfering_moves
+            .iter()
+            .any(|inter| inter.origin.row == self.inner.origin.row))
+        {
+            return notation_creator(self, OriginAmbiguationLevel::RankOnly, capture_repr);
+        }
 
-    if not(interfering_moves
-        .iter()
-        .any(|inter| inter.origin.col == mv.inner.origin.col))
-    {
-        return notation_creator(mv, OriginAmbiguationLevel::FileOnly, capture_repr);
-    }
+        if not(interfering_moves
+            .iter()
+            .any(|inter| inter.origin.col == self.inner.origin.col))
+        {
+            return notation_creator(self, OriginAmbiguationLevel::FileOnly, capture_repr);
+        }
 
-    notation_creator(mv, OriginAmbiguationLevel::Full, capture_repr)
+        notation_creator(self, OriginAmbiguationLevel::Full, capture_repr)
+    }
 }
+
 #[cfg(test)]
 mod tests {
     use std::println;

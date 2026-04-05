@@ -2,7 +2,6 @@ use crate::coord::Square;
 use crate::game::CastlingSide;
 use crate::game::GameState;
 use crate::game::Phase::Ongoing;
-use crate::game::StepResult;
 use crate::piece::Piece;
 use crate::piece::PieceKind;
 
@@ -109,12 +108,6 @@ impl InnerMove {
 pub struct Move {
     pub inner: InnerMove,
     pub game: GameState<{ Ongoing }>,
-}
-
-impl Move {
-    pub fn make(self) -> StepResult {
-        self.game.step(self.inner)
-    }
 }
 
 #[derive_const(PartialEq, Eq, Clone)]

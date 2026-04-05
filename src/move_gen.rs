@@ -74,14 +74,14 @@ impl GameState<{ Ongoing }> {
             use rand::seq::IndexedRandom;
 
             checker(&game);
-            let legal_moves: Vec<InnerMove> = game.core.legal_moves().collect();
+            let legal_moves: Vec<Move> = game.legal_moves().collect();
 
             let random_move = legal_moves
                 .choose(&mut rng)
                 .expect("a GameState<Ongoing> to always have legal moves")
                 .to_owned();
 
-            match game.clone().step(random_move) {
+            match random_move.make() {
                 StepResult::Continue(game_state) => {
                     game = game_state;
                 }
@@ -336,7 +336,6 @@ mod tests {
     use std::println;
 
     use super::*;
-    use crate::notation::algebraic::san;
     use crate::testing::skip_if_no_expensive_test_opt_in;
 
     #[test]
@@ -411,7 +410,7 @@ mod tests {
     fn owl_checker_depth_1(game: &GameState<{ Ongoing }>) {
         let schach_all_legals = game.legal_moves().collect::<Vec<_>>();
         for mv in schach_all_legals {
-            let schach_move_san = san(mv.clone());
+            let schach_move_san = mv.clone().san();
             let owl_board = owlchess::Board::from_fen(game.core.to_fen().as_str()).unwrap();
             let owl_move = owlchess::Move::from_san(schach_move_san.as_str(), &owl_board).unwrap();
 
@@ -438,7 +437,7 @@ mod tests {
                 println!();
                 println!("schach moves: {new_schach_move_count}");
                 for mv in new_schach_moves {
-                    println!("{}", san(mv).as_str());
+                    println!("{}", mv.san().as_str());
                 }
                 println!("owlchs moves: {new_owl_move_count}");
                 for mv in &new_owl_moves {
