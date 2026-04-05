@@ -106,8 +106,39 @@ impl InnerMove {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Move {
-    pub inner: InnerMove,
-    pub game: Game<{ Ongoing }>,
+    inner: InnerMove,
+    game: Game<{ Ongoing }>,
+}
+
+impl Move {
+    #[must_use]
+    pub const fn inner(&self) -> InnerMove {
+        self.inner
+    }
+
+    #[must_use]
+    pub const fn game(&self) -> &Game<{ Ongoing }> {
+        &self.game
+    }
+
+    #[must_use]
+    pub const fn kind(&self) -> MoveKind {
+        self.inner.kind
+    }
+
+    #[must_use]
+    pub const fn origin(&self) -> Square {
+        self.inner.origin
+    }
+
+    #[must_use]
+    pub const fn destination(&self) -> Square {
+        self.inner.destination
+    }
+
+    pub(crate) const fn create_unchecked(inner: InnerMove, game: Game<{ Ongoing }>) -> Self {
+        Self { inner, game }
+    }
 }
 
 #[derive_const(PartialEq, Eq, Clone)]

@@ -94,10 +94,9 @@ impl Game<{ Ongoing }> {
     }
 
     pub fn legal_moves(&self) -> impl Iterator<Item = Move> {
-        self.core.legal_inner_moves().map(|inner| Move {
-            inner,
-            game: self.clone(),
-        })
+        self.core
+            .legal_inner_moves()
+            .map(|inner| Move::create_unchecked(inner, self.clone()))
     }
 }
 
