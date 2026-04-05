@@ -7,10 +7,10 @@ use crate::board::Board;
 use crate::coord::Square;
 use crate::game::CastlingRight;
 use crate::game::CastlingSide;
+use crate::game::Game;
+use crate::game::GameCore;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
-use crate::game::GameState;
-use crate::game::GameStateCore;
 use crate::game::Phase::Ongoing;
 use crate::game::Phase::Terminated;
 use crate::game::StepResult;
@@ -22,11 +22,11 @@ use crate::mv::PawnMove;
 use crate::mv::Threat;
 use crate::piece::PieceKind;
 
-impl GameState<{ Ongoing }> {
+impl Game<{ Ongoing }> {
     #[must_use]
     pub fn search(self, max_depth: u32, checker: impl Fn(&Self)) -> SearchStats {
-        let mut terminated_games_checkmate: Vec<GameState<{ Terminated }>> = vec![];
-        let mut terminated_games_draw: Vec<GameState<{ Terminated }>> = vec![];
+        let mut terminated_games_checkmate: Vec<Game<{ Terminated }>> = vec![];
+        let mut terminated_games_draw: Vec<Game<{ Terminated }>> = vec![];
         let mut continued_games: Vec<Self> = vec![self];
         let mut new_continued_games: Vec<Self> = vec![];
 
@@ -101,7 +101,7 @@ impl GameState<{ Ongoing }> {
     }
 }
 
-impl GameStateCore {
+impl GameCore {
     pub fn legal_inner_moves(&self) -> impl Iterator<Item = InnerMove> {
         self.threatening_move_candidates()
             .chain(self.pawn_step_candidates())
@@ -343,7 +343,7 @@ mod tests {
         skip_if_no_expensive_test_opt_in!();
 
         let depth = 3;
-        let game = GameState::default();
+        let game = Game::default();
 
         let before = std::time::Instant::now();
 
@@ -361,7 +361,7 @@ mod tests {
         skip_if_no_expensive_test_opt_in!();
 
         let depth = 3;
-        let game = GameState::perft();
+        let game = Game::perft();
 
         let before = std::time::Instant::now();
 
@@ -383,13 +383,13 @@ mod tests {
 
         let max_depth = 1_000;
         let walk_count = 1_000;
-        let game = GameState::INITIAL;
+        let game = Game::INITIAL;
 
         (0..walk_count).into_par_iter().panic_fuse().for_each(|i| {
             match game.clone().random_walk(max_depth, owl_checker_depth_1) {
-                StepResult::Continue(GameState { core, .. })
+                StepResult::Continue(Game { core, .. })
                 | StepResult::Break(GameResult {
-                    final_game_state: GameState { core, .. },
+                    final_game_state: Game { core, .. },
                     ..
                 }) => println!("{i}: {:?}", core.full_move_count),
             }
@@ -397,7 +397,7 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn owl_checker_move_count(core: &GameStateCore) {
+    fn owl_checker_move_count(core: &GameCore) {
         let schach_move_count = core.legal_inner_moves().count();
         let owl_move_count = owlchess::movegen::legal::gen_all(
             &owlchess::Board::from_fen(core.to_fen().as_str()).unwrap(),
@@ -407,7 +407,7 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn owl_checker_depth_1(game: &GameState<{ Ongoing }>) {
+    fn owl_checker_depth_1(game: &Game<{ Ongoing }>) {
         let schach_all_legals = game.legal_moves().collect::<Vec<_>>();
         for mv in schach_all_legals {
             let schach_move_san = mv.clone().san();

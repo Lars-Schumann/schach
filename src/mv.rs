@@ -1,6 +1,6 @@
 use crate::coord::Square;
 use crate::game::CastlingSide;
-use crate::game::GameState;
+use crate::game::Game;
 use crate::game::Phase::Ongoing;
 use crate::piece::Piece;
 use crate::piece::PieceKind;
@@ -107,7 +107,7 @@ impl InnerMove {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Move {
     pub inner: InnerMove,
-    pub game: GameState<{ Ongoing }>,
+    pub game: Game<{ Ongoing }>,
 }
 
 #[derive_const(PartialEq, Eq, Clone)]

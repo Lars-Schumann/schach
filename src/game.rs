@@ -56,7 +56,7 @@ impl GameResultKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GameResult {
     pub kind: GameResultKind,
-    pub final_game_state: GameState<{ Terminated }>,
+    pub final_game_state: Game<{ Terminated }>,
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
@@ -65,7 +65,7 @@ pub struct GameResult {
 //     Terminated(GameResult),
 // }
 
-pub type StepResult = ControlFlow<GameResult, GameState<{ Ongoing }>>;
+pub type StepResult = ControlFlow<GameResult, Game<{ Ongoing }>>;
 
 #[derive_const(Default, Clone, PartialEq, Eq)]
 #[derive(Debug, Copy, Hash)]
@@ -192,7 +192,7 @@ pub enum RuleSet {
 
 #[derive(Debug, Copy)]
 #[derive_const(Clone, PartialEq, Eq, Default)]
-pub struct GameStateCore {
+pub struct GameCore {
     pub board: Board,
     pub fifty_move_rule_clock: FiftyMoveRuleClock,
     pub castling_rights: CastlingRights,
@@ -200,7 +200,7 @@ pub struct GameStateCore {
     pub active_player: PlayerKind,
     pub full_move_count: FullMoveCount,
 }
-impl GameStateCore {
+impl GameCore {
     #[must_use]
     pub(crate) const fn with_opponent_active(mut self) -> Self {
         self.active_player = self.active_player.opponent();
@@ -246,17 +246,17 @@ pub enum Phase {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 #[derive_const(Default)]
-pub struct GameState<const P: Phase> {
-    pub core: GameStateCore,
+pub struct Game<const P: Phase> {
+    pub core: GameCore,
     pub position_history: Vec<Position>,
     pub rule_set: RuleSet,
 }
 
-impl GameState<{ Phase::Ongoing }> {
+impl Game<{ Phase::Ongoing }> {
     pub const INITIAL: Self = Self::default();
 
-    fn terminated(self) -> GameState<{ Terminated }> {
-        GameState::<{ Terminated }> {
+    fn terminated(self) -> Game<{ Terminated }> {
+        Game::<{ Terminated }> {
             core: self.core,
             position_history: self.position_history,
             rule_set: self.rule_set,
@@ -264,7 +264,7 @@ impl GameState<{ Phase::Ongoing }> {
     }
 
     #[must_use]
-    fn with_core(core: GameStateCore) -> Self {
+    fn with_core(core: GameCore) -> Self {
         Self {
             core,
             ..Default::default()
@@ -272,7 +272,7 @@ impl GameState<{ Phase::Ongoing }> {
     }
 
     pub fn try_from_fen(fen: &str) -> Result<Self, GameFromFenError> {
-        Ok(Self::with_core(GameStateCore::try_from_fen(fen)?))
+        Ok(Self::with_core(GameCore::try_from_fen(fen)?))
     }
 
     #[must_use]

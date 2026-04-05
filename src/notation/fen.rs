@@ -15,7 +15,7 @@ use crate::game::CastlingRight;
 use crate::game::CastlingRights;
 use crate::game::FiftyMoveRuleClock;
 use crate::game::FullMoveCount;
-use crate::game::GameStateCore;
+use crate::game::GameCore;
 use crate::piece::Piece;
 use crate::piece::PieceKind;
 use crate::player::PlayerKind;
@@ -39,7 +39,7 @@ pub enum GameFromFenError {
     MalformedFiftyRuleClock(core::num::ParseIntError),
     MalformedMoveCount(core::num::ParseIntError),
 }
-impl GameStateCore {
+impl GameCore {
     pub fn try_from_fen(fen: &str) -> Result<Self, GameFromFenError> {
         let fen_parts: [Vec<AsciiChar>; 6] = fen
             .split_ascii_whitespace()
@@ -520,7 +520,7 @@ mod tests {
         let starting_position_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         assert_eq!(
             starting_position_fen,
-            GameStateCore::default().to_fen().as_str()
+            GameCore::default().to_fen().as_str()
         );
     }
 }
