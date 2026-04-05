@@ -1,5 +1,8 @@
 use crate::coord::Square;
 use crate::game::CastlingSide;
+use crate::game::GameState;
+use crate::game::Phase::Ongoing;
+use crate::game::StepResult;
 use crate::piece::Piece;
 use crate::piece::PieceKind;
 
@@ -20,8 +23,8 @@ impl core::fmt::Debug for Threat {
     }
 }
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
 pub enum MoveKind {
     Pawn(PawnMove),
     Knight { is_capture: bool },
@@ -74,13 +77,14 @@ impl MoveKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Move {
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
+pub struct InnerMove {
     pub kind: MoveKind,
     pub origin: Square,
     pub destination: Square,
 }
-impl Move {
+impl InnerMove {
     #[must_use]
     pub const fn is_capture(&self) -> bool {
         match self.kind {
@@ -101,8 +105,20 @@ impl Move {
     }
 }
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Move {
+    pub inner: InnerMove,
+    pub game: GameState<{ Ongoing }>,
+}
+
+impl Move {
+    pub fn make(self) -> StepResult {
+        self.game.step(self.inner)
+    }
+}
+
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
 pub enum PawnMove {
     SingleStep {
         promotion_replacement: Option<Piece>,
@@ -116,8 +132,8 @@ pub enum PawnMove {
     },
 }
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
 pub enum KingMove {
     Normal {
         is_capture: bool,

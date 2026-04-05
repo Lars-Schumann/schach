@@ -10,6 +10,7 @@ use crate::game::GameResultKind;
 use crate::game::GameState;
 use crate::game::Phase::Ongoing;
 use crate::game::StepResult;
+use crate::mv::InnerMove;
 use crate::mv::KingMove;
 use crate::mv::Move;
 use crate::mv::MoveKind;
@@ -46,12 +47,11 @@ struct CaptureRepresentation {
 
 #[must_use]
 fn notation_creator(
-    game: GameState<{ Ongoing }>,
     mv: Move,
     ambiguation_level: OriginAmbiguationLevel,
     capture_representation: CaptureRepresentation,
 ) -> Vec<AsciiChar> {
-    let core_move_notation = match mv.kind {
+    let core_move_notation = match mv.inner.kind {
         MoveKind::King(KingMove::Castle {
             castling_side: CastlingSide::Kingside,
             ..
@@ -66,7 +66,8 @@ fn notation_creator(
         | MoveKind::Rook { .. }
         | MoveKind::Queen { .. }
         | MoveKind::King(KingMove::Normal { .. }) => {
-            let piece_repr = (mv.kind.is_pawn()).not().then_some([mv
+            let piece_repr = (mv.inner.kind.is_pawn()).not().then_some([mv
+                .inner
                 .kind
                 .piece_kind()
                 .to_white_piece()
@@ -74,20 +75,20 @@ fn notation_creator(
 
             let start_square_repr = match ambiguation_level {
                 OriginAmbiguationLevel::Empty => [].to_vec(),
-                OriginAmbiguationLevel::FileOnly => [mv.origin.col.to_fen_repr()].to_vec(),
-                OriginAmbiguationLevel::RankOnly => [mv.origin.row.to_fen_repr()].to_vec(),
-                OriginAmbiguationLevel::Full => mv.origin.to_fen_repr().to_vec(),
+                OriginAmbiguationLevel::FileOnly => [mv.inner.origin.col.to_fen_repr()].to_vec(),
+                OriginAmbiguationLevel::RankOnly => [mv.inner.origin.row.to_fen_repr()].to_vec(),
+                OriginAmbiguationLevel::Full => mv.inner.origin.to_fen_repr().to_vec(),
             };
 
-            let capture_symbol = if mv.is_capture() {
+            let capture_symbol = if mv.inner.is_capture() {
                 capture_representation.capture.map(|c| [c])
             } else {
                 capture_representation.no_capture.map(|c| [c])
             };
 
-            let target = mv.destination.to_fen_repr();
+            let target = mv.inner.destination.to_fen_repr();
 
-            let promotion_replacement = match mv.kind {
+            let promotion_replacement = match mv.inner.kind {
                 MoveKind::Pawn(
                     PawnMove::SingleStep {
                         promotion_replacement: Some(replacement),
@@ -111,7 +112,7 @@ fn notation_creator(
         }
     };
 
-    let outcome = game.step(mv);
+    let outcome = mv.make();
 
     let mut append = vec![];
     match outcome {
@@ -136,10 +137,9 @@ fn notation_creator(
 }
 
 #[must_use]
-pub fn lan(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
+pub fn lan(mv: Move) -> Vec<AsciiChar> {
     notation_creator(
-        game,
-        mov,
+        mv,
         OriginAmbiguationLevel::Full,
         CaptureRepresentation {
             capture: Some(AsciiChar::SmallX),
@@ -149,29 +149,29 @@ pub fn lan(game: GameState<{ Ongoing }>, mov: Move) -> Vec<AsciiChar> {
 }
 
 #[must_use]
-pub fn san(mv: Move, game: GameState<{ Ongoing }>) -> Vec<AsciiChar> {
+pub fn san(mv: Move) -> Vec<AsciiChar> {
     let capture_repr = CaptureRepresentation {
         capture: Some(AsciiChar::SmallX),
         no_capture: None,
     };
-    let mut legal_moves = game.core.legal_moves().collect::<Vec<_>>();
+    let mut legal_moves = mv.game.core.legal_inner_moves().collect::<Vec<_>>();
 
     let mov_index = legal_moves
         .iter()
-        .position(|m| *m == mv)
+        .position(|m| *m == mv.inner)
         .expect("passed illegal move");
 
     legal_moves.swap_remove(mov_index);
 
     let interfering_moves = legal_moves
         .iter()
-        .filter(|legal| legal.kind.piece_kind() == mv.kind.piece_kind())
-        .filter(|legal| legal.destination == mv.destination)
+        .filter(|legal| legal.kind.piece_kind() == mv.inner.kind.piece_kind())
+        .filter(|legal| legal.destination == mv.inner.destination)
         .filter(|legal| {
             // for the Promotion case, remove Duplicate Promotions to just different pieces.
-            if mv.kind.is_promotion()
-                && legal.origin == mv.origin
-                && legal.destination == mv.destination
+            if mv.inner.kind.is_promotion()
+                && legal.origin == mv.inner.origin
+                && legal.destination == mv.inner.destination
             {
                 return false;
             }
@@ -180,28 +180,28 @@ pub fn san(mv: Move, game: GameState<{ Ongoing }>) -> Vec<AsciiChar> {
         .collect::<Vec<_>>();
 
     if interfering_moves.is_empty() {
-        if mv.kind.piece_kind() == PieceKind::Pawn && mv.is_capture() {
+        if mv.inner.kind.piece_kind() == PieceKind::Pawn && mv.inner.is_capture() {
             //Pawns always have the File when capturing!
-            return notation_creator(game, mv, OriginAmbiguationLevel::FileOnly, capture_repr);
+            return notation_creator(mv, OriginAmbiguationLevel::FileOnly, capture_repr);
         }
-        return notation_creator(game, mv, OriginAmbiguationLevel::Empty, capture_repr);
+        return notation_creator(mv, OriginAmbiguationLevel::Empty, capture_repr);
     }
 
     if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.row == mv.origin.row))
+        .any(|inter| inter.origin.row == mv.inner.origin.row))
     {
-        return notation_creator(game, mv, OriginAmbiguationLevel::RankOnly, capture_repr);
+        return notation_creator(mv, OriginAmbiguationLevel::RankOnly, capture_repr);
     }
 
     if not(interfering_moves
         .iter()
-        .any(|inter| inter.origin.col == mv.origin.col))
+        .any(|inter| inter.origin.col == mv.inner.origin.col))
     {
-        return notation_creator(game, mv, OriginAmbiguationLevel::FileOnly, capture_repr);
+        return notation_creator(mv, OriginAmbiguationLevel::FileOnly, capture_repr);
     }
 
-    notation_creator(game, mv, OriginAmbiguationLevel::Full, capture_repr)
+    notation_creator(mv, OriginAmbiguationLevel::Full, capture_repr)
 }
 #[cfg(test)]
 mod tests {

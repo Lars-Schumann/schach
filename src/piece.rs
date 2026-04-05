@@ -5,8 +5,8 @@ macro_rules! no_fmt {
     ($($beautiful_code:tt)*) => { $($beautiful_code)* }
 }
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
 pub enum PieceKind {
     Pawn,
     Knight,
@@ -43,8 +43,8 @@ impl PieceKind {
     }
 }
 
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Copy, Clone)]
+#[derive_const(PartialEq, Eq, Clone)]
+#[derive(Debug, Copy)]
 pub struct Piece {
     pub owner: PlayerKind,
     pub kind: PieceKind,

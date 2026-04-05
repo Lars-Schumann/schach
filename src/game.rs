@@ -10,7 +10,7 @@ use Phase::Terminated;
 
 use crate::board::Board;
 use crate::coord::Square;
-use crate::mv::Move;
+use crate::mv::InnerMove;
 use crate::mv::MoveKind;
 use crate::mv::Threat;
 use crate::notation::fen::GameFromFenError;
@@ -236,7 +236,7 @@ impl GameStateCore {
     }
 }
 
-#[derive(core::marker::ConstParamTy)]
+#[derive(Copy, core::marker::ConstParamTy)]
 #[derive_const(Clone, PartialEq, Eq)]
 pub enum Phase {
     Ongoing,
@@ -282,7 +282,7 @@ impl GameState<{ Phase::Ongoing }> {
         }
     }
 
-    pub fn step(mut self, mv: Move) -> StepResult {
+    pub(crate) fn step(mut self, mv: InnerMove) -> StepResult {
         self.core.board.apply_move(mv);
         let mut game = self;
 
@@ -326,7 +326,7 @@ impl GameState<{ Phase::Ongoing }> {
             future.en_passant_target = Some(possible_en_passant_target);
 
             future
-                .legal_moves()
+                .legal_inner_moves()
                 .any(|mv| mv.kind.is_pawn_en_passant())
                 .then_some(possible_en_passant_target)
         } else {
@@ -351,7 +351,7 @@ impl GameState<{ Phase::Ongoing }> {
         }
 
         let future = game.core.with_opponent_active();
-        if future.legal_moves().count() == 0 {
+        if future.legal_inner_moves().count() == 0 {
             return if future.board.is_king_checked(future.active_player) {
                 StepResult::Break(GameResult {
                     kind: GameResultKind::Win,

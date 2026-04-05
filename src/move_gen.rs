@@ -14,6 +14,7 @@ use crate::game::GameStateCore;
 use crate::game::Phase::Ongoing;
 use crate::game::Phase::Terminated;
 use crate::game::StepResult;
+use crate::mv::InnerMove;
 use crate::mv::KingMove;
 use crate::mv::Move;
 use crate::mv::MoveKind;
@@ -32,10 +33,10 @@ impl GameState<{ Ongoing }> {
         for _ in 0..=max_depth {
             continued_games.clone().into_iter().for_each(|game| {
                 checker(&game);
-                let legal_moves: Vec<Move> = game.core.legal_moves().collect();
+                let legal_moves: Vec<Move> = game.legal_moves().collect();
 
                 for mv in legal_moves {
-                    match game.clone().step(mv) {
+                    match mv.make() {
                         StepResult::Break(GameResult {
                             kind: GameResultKind::Win,
                             final_game_state,
@@ -73,7 +74,7 @@ impl GameState<{ Ongoing }> {
             use rand::seq::IndexedRandom;
 
             checker(&game);
-            let legal_moves: Vec<Move> = game.core.legal_moves().collect();
+            let legal_moves: Vec<InnerMove> = game.core.legal_moves().collect();
 
             let random_move = legal_moves
                 .choose(&mut rng)
@@ -91,22 +92,29 @@ impl GameState<{ Ongoing }> {
         }
         StepResult::Continue(game)
     }
+
+    pub fn legal_moves(&self) -> impl Iterator<Item = Move> {
+        self.core.legal_inner_moves().map(|inner| Move {
+            inner,
+            game: self.clone(),
+        })
+    }
 }
 
 impl GameStateCore {
-    pub fn legal_moves(&self) -> impl Iterator<Item = Move> {
+    pub fn legal_inner_moves(&self) -> impl Iterator<Item = InnerMove> {
         self.threatening_move_candidates()
             .chain(self.pawn_step_candidates())
             .chain(self.castle_candidates())
-            .filter(move |mov| {
+            .filter(move |mv| {
                 self.board
-                    .with_move_applied(*mov)
+                    .with_move_applied(*mv)
                     .is_king_checked(self.active_player)
                     .not()
             })
     }
 
-    gen fn castle_candidates(&self) -> Move {
+    gen fn castle_candidates(&self) -> InnerMove {
         for castling_side in CastlingSide::ALL {
             if self.castling_rights[(self.active_player, castling_side)]
                 == CastlingRight::Unavailable
@@ -118,7 +126,7 @@ impl GameStateCore {
                 continue;
             }
 
-            yield Move {
+            yield InnerMove {
                 kind: MoveKind::King(KingMove::Castle {
                     rook_start: self.active_player.rook_start(castling_side),
                     rook_target: self.active_player.rook_castling_target(castling_side),
@@ -130,13 +138,13 @@ impl GameStateCore {
         }
     }
 
-    fn threatening_move_candidates(&self) -> impl Iterator<Item = Move> {
+    fn threatening_move_candidates(&self) -> impl Iterator<Item = InnerMove> {
         self.board
             .threatening_moves_by(self.active_player)
             .flat_map(|threat| self.threat_to_move_candidates(threat))
     }
 
-    gen fn pawn_step_candidates(&self) -> Move {
+    gen fn pawn_step_candidates(&self) -> InnerMove {
         for square in Square::ALL {
             if self.board[square] != Some(PieceKind::Pawn.to_piece(self.active_player)) {
                 continue;
@@ -151,7 +159,7 @@ impl GameStateCore {
 
             if one_in_front.row == self.active_player.pawn_promotion_row() {
                 for promotion_option in PieceKind::PROMOTION_OPTIONS {
-                    yield Move {
+                    yield InnerMove {
                         kind: MoveKind::Pawn(PawnMove::SingleStep {
                             promotion_replacement: Some(
                                 promotion_option.to_piece(self.active_player),
@@ -162,7 +170,7 @@ impl GameStateCore {
                     }
                 }
             } else {
-                yield Move {
+                yield InnerMove {
                     kind: MoveKind::Pawn(PawnMove::SingleStep {
                         promotion_replacement: None,
                     }),
@@ -183,7 +191,7 @@ impl GameStateCore {
                 continue; // pawns cant capture moving forward!
             }
 
-            yield Move {
+            yield InnerMove {
                 kind: MoveKind::Pawn(PawnMove::DoubleStep),
                 origin: square,
                 destination: two_in_front,
@@ -192,32 +200,32 @@ impl GameStateCore {
     }
 
     #[must_use]
-    fn threat_to_move_candidates(&self, threat: Threat) -> Vec<Move> {
+    fn threat_to_move_candidates(&self, threat: Threat) -> Vec<InnerMove> {
         let is_capture = self.board[threat.destination].is_some();
         let origin = threat.origin;
         let destination = threat.destination;
         match threat.piece.kind {
-            PieceKind::Knight => vec![Move {
+            PieceKind::Knight => vec![InnerMove {
                 kind: MoveKind::Knight { is_capture },
                 origin,
                 destination,
             }],
-            PieceKind::Bishop => vec![Move {
+            PieceKind::Bishop => vec![InnerMove {
                 kind: MoveKind::Bishop { is_capture },
                 origin,
                 destination,
             }],
-            PieceKind::Rook => vec![Move {
+            PieceKind::Rook => vec![InnerMove {
                 kind: MoveKind::Rook { is_capture },
                 origin,
                 destination,
             }],
-            PieceKind::Queen => vec![Move {
+            PieceKind::Queen => vec![InnerMove {
                 kind: MoveKind::Queen { is_capture },
                 origin,
                 destination,
             }],
-            PieceKind::King => vec![Move {
+            PieceKind::King => vec![InnerMove {
                 kind: MoveKind::King(KingMove::Normal { is_capture }),
                 origin,
                 destination,
@@ -226,7 +234,7 @@ impl GameStateCore {
                 if threat.destination.row == self.active_player.pawn_promotion_row() {
                     PieceKind::PROMOTION_OPTIONS
                         .iter()
-                        .map(|promotion_option| Move {
+                        .map(|promotion_option| InnerMove {
                             kind: MoveKind::Pawn(PawnMove::Capture {
                                 promotion_replacement: Some(
                                     promotion_option.to_piece(self.active_player),
@@ -237,7 +245,7 @@ impl GameStateCore {
                         })
                         .collect()
                 } else {
-                    vec![Move {
+                    vec![InnerMove {
                         kind: MoveKind::Pawn(PawnMove::Capture {
                             promotion_replacement: None,
                         }),
@@ -249,7 +257,7 @@ impl GameStateCore {
             PieceKind::Pawn => {
                 //en passant case, this is never gonna lead to promotion
                 if Some(destination) == self.en_passant_target {
-                    vec![Move {
+                    vec![InnerMove {
                         kind: MoveKind::Pawn(PawnMove::EnPassant {
                             affected: (threat.destination + self.active_player.backwards_one_row())
                                 .expect("this to be on the board"),
@@ -266,12 +274,12 @@ impl GameStateCore {
 }
 
 impl Board {
-    pub const fn apply_move(&mut self, mv: Move) {
+    pub const fn apply_move(&mut self, mv: InnerMove) {
         *self = self.with_move_applied(mv);
     }
 
     #[must_use]
-    pub const fn with_move_applied(mut self, mv: Move) -> Self {
+    pub const fn with_move_applied(mut self, mv: InnerMove) -> Self {
         self.mov(mv.origin, mv.destination);
         match mv.kind {
             | MoveKind::Pawn(
@@ -390,10 +398,10 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn owl_checker_move_count(game: &GameState<{ Ongoing }>) {
-        let schach_move_count = game.core.legal_moves().count();
+    fn owl_checker_move_count(core: &GameStateCore) {
+        let schach_move_count = core.legal_inner_moves().count();
         let owl_move_count = owlchess::movegen::legal::gen_all(
-            &owlchess::Board::from_fen(game.core.to_fen().as_str()).unwrap(),
+            &owlchess::Board::from_fen(core.to_fen().as_str()).unwrap(),
         )
         .len();
         assert_eq!(schach_move_count, owl_move_count);
@@ -401,21 +409,21 @@ mod tests {
 
     #[allow(dead_code)]
     fn owl_checker_depth_1(game: &GameState<{ Ongoing }>) {
-        let schach_all_legals = game.core.legal_moves().collect::<Vec<_>>();
-        for mv in &schach_all_legals {
-            let schach_move_san = san(*mv, game.clone());
+        let schach_all_legals = game.legal_moves().collect::<Vec<_>>();
+        for mv in schach_all_legals {
+            let schach_move_san = san(mv.clone());
             let owl_board = owlchess::Board::from_fen(game.core.to_fen().as_str()).unwrap();
             let owl_move = owlchess::Move::from_san(schach_move_san.as_str(), &owl_board).unwrap();
 
             let new_owl_board = owl_board.make_move(owl_move).unwrap();
-            let StepResult::Continue(new_schach_board) = game.clone().step(*mv) else {
+            let StepResult::Continue(new_schach_board) = mv.make() else {
                 continue;
             };
 
             let new_owl_moves = owlchess::movegen::legal::gen_all(&new_owl_board);
             let new_owl_move_count = new_owl_moves.iter().count();
 
-            let new_schach_moves = new_schach_board.core.legal_moves().collect::<Vec<_>>();
+            let new_schach_moves = new_schach_board.legal_moves().collect::<Vec<_>>();
             let new_schach_move_count = new_schach_moves.len();
 
             if new_schach_move_count != new_owl_move_count {
@@ -430,7 +438,7 @@ mod tests {
                 println!();
                 println!("schach moves: {new_schach_move_count}");
                 for mv in new_schach_moves {
-                    println!("{}", san(mv, new_schach_board.clone()).as_str());
+                    println!("{}", san(mv).as_str());
                 }
                 println!("owlchs moves: {new_owl_move_count}");
                 for mv in &new_owl_moves {
