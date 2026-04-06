@@ -1,9 +1,6 @@
 # Schach
 
 A chess simulator, legal move generator, and notation parser with a focus on simplicity and correctness.
-
-`#![no_std]` compatible, `#![forbid_unsafe]` completely safe and 0 hard dependencies.
-
 This Crate relies on several unstable features, mainly for const Traits and Generators.
 
 # Example
@@ -29,3 +26,11 @@ fn main() {
     }
 }
 ```
+
+# Guarantees
+
+- `#![no_std]` compatible
+- `#![forbid_unsafe]` completely safe
+- 0 hard dependencies
+- every `Ongoing` `Game` has at least one legal move 
+- starting from a valid `Game`, one can only reach other valid `Game`s, notably this is implemented without having to re-check the legality of a `Move` before it is made
