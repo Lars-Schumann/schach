@@ -1,4 +1,3 @@
-use alloc::format;
 use alloc::vec::Vec;
 use core::num::NonZeroU64;
 use core::ops::ControlFlow;
@@ -19,8 +18,8 @@ use crate::notation::GameFromFenError;
 use crate::piece::Piece;
 use crate::player::PlayerKind;
 
-pub(crate) static REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
-pub(crate) static FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
+pub(crate) const REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
+pub(crate) const FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
 
 #[derive_const(Clone, PartialEq, Eq)]
 #[derive(Debug, Copy)]
