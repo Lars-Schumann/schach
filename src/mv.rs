@@ -106,8 +106,8 @@ impl InnerMove {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Move {
-    inner: InnerMove,
-    game: Game<{ Ongoing }>,
+    pub(crate) inner: InnerMove,
+    pub(crate) game: Game<{ Ongoing }>,
 }
 
 impl Move {

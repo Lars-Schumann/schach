@@ -415,7 +415,7 @@ impl Game<{ Phase::Ongoing }> {
 
 impl Move {
     pub fn make(self) -> StepResult {
-        self.game().clone().step(self.inner())
+        self.game.step(self.inner)
     }
 }
 
