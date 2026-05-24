@@ -10,8 +10,7 @@
     ascii_char,
     ascii_char_variants,
     coroutines,
-    gen_blocks,
-    result_option_map_or_default
+    gen_blocks
 )]
 #![forbid(unsafe_code)]
 #![no_std]

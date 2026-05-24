@@ -99,11 +99,11 @@ fn notation_creator(
 
             no_fmt! {
             [
-                piece_repr.as_ref().map_or_default(<[_; 1]>::as_slice),
+                piece_repr.as_ref().map_or_else(Default::default, <[_; 1]>::as_slice),
                 start_square_repr.as_slice(),
-                capture_symbol.as_ref().map_or_default(<[_; 1]>::as_slice),
+                capture_symbol.as_ref().map_or_else(Default::default, <[_; 1]>::as_slice),
                 target.as_slice(),
-                promotion_replacement.as_ref().map_or_default(<[_; 1]>::as_slice),
+                promotion_replacement.as_ref().map_or_else(Default::default, <[_; 1]>::as_slice),
             ]
             .concat()
             }
