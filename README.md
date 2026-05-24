@@ -1,7 +1,7 @@
 # Schach
 
 A chess simulator, legal move generator, and notation parser with a focus on simplicity and correctness.
-This Crate relies on several unstable features, mainly for const Traits and Generators.
+This Crate relies on several unstable features so that it can make use of Ascii Chars, Generators, and const generic Enums.
 
 # Example
 
