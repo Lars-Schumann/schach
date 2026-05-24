@@ -378,20 +378,20 @@ impl Board {
 }
 
 impl Col {
-    const fn try_from_fen_repr(value: AsciiChar) -> Result<Self, ColIndexOutOfRange> {
+    fn try_from_fen_repr(value: AsciiChar) -> Result<Self, ColIndexOutOfRange> {
         Self::try_from(u8::from(value) - b'a' + 1)
     }
     #[must_use]
-    pub(crate) const fn to_fen_repr(self) -> AsciiChar {
+    pub(crate) fn to_fen_repr(self) -> AsciiChar {
         AsciiChar::from_u8(u8::from(self) + b'a' - 1).expect("a..=h to be ascii")
     }
 }
 impl Row {
-    const fn try_from_fen_repr(value: AsciiChar) -> Result<Self, RowIndexOutOfRange> {
+    fn try_from_fen_repr(value: AsciiChar) -> Result<Self, RowIndexOutOfRange> {
         Self::try_from(u8::from(value) - b'0')
     }
     #[must_use]
-    pub(crate) const fn to_fen_repr(self) -> AsciiChar {
+    pub(crate) fn to_fen_repr(self) -> AsciiChar {
         AsciiChar::from_u8(u8::from(self) + b'0').expect("0..=8 to be ascii")
     }
 }
@@ -424,7 +424,7 @@ impl Square {
     }
 
     #[must_use]
-    pub(super) const fn to_fen_repr(self) -> [AsciiChar; 2] {
+    pub(super) fn to_fen_repr(self) -> [AsciiChar; 2] {
         [Col::to_fen_repr(self.col), Row::to_fen_repr(self.row)]
     }
 

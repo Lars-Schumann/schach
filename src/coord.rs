@@ -10,7 +10,7 @@ use crate::board::ROW_COUNT;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, Hash)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Square {
     pub col: Col,
     pub row: Row,
@@ -27,11 +27,11 @@ impl Square {
         Self { col, row }
     }
     #[must_use]
-    pub const fn is_black(self) -> bool {
+    pub fn is_black(self) -> bool {
         (u8::from(self.col) + u8::from(self.row)).is_multiple_of(2)
     }
     #[must_use]
-    pub const fn is_white(self) -> bool {
+    pub fn is_white(self) -> bool {
         self.is_black().not()
     }
 
@@ -121,7 +121,7 @@ impl Square {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[derive(Debug, Copy, Hash)]
 pub enum Col {
     _1,
@@ -147,7 +147,7 @@ impl Col {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[derive(Debug, Copy, Hash)]
 pub enum Row {
     _1,
@@ -171,14 +171,14 @@ impl Row {
         Self::_8,
     ];
 }
-impl const Add<i32> for Row {
+impl Add<i32> for Row {
     type Output = Result<Self, RowIndexOutOfRange>;
     fn add(self, rhs: i32) -> Self::Output {
         let row_number: i32 = self.into();
         (row_number + rhs).try_into()
     }
 }
-impl const Add<i32> for Col {
+impl  Add<i32> for Col {
     type Output = Result<Self, ColIndexOutOfRange>;
     fn add(self, rhs: i32) -> Self::Output {
         let column_number: i32 = self.into();
@@ -189,7 +189,7 @@ impl const Add<i32> for Col {
 macro_rules! col_into_int_impl {
     ($($ty:ty)*) => {
         $(
-            impl const From<Col> for $ty {
+            impl From<Col> for $ty {
                 fn from(value: Col) -> $ty {
                     match value {
                         Col::_1 => 1,
@@ -210,7 +210,7 @@ macro_rules! col_into_int_impl {
 macro_rules! row_into_int_impl {
     ($($ty:ty)*) => {
         $(
-            impl const From<Row> for $ty {
+            impl From<Row> for $ty {
                 fn from(value: Row) -> $ty {
                     match value {
                         Row::_1 => 1,
@@ -243,7 +243,7 @@ pub enum RowIndexOutOfRange {
 macro_rules! col_try_from_int_impl {
     ($($ty:ty)*) => {
         $(
-            impl const TryFrom<$ty> for Col {
+            impl TryFrom<$ty> for Col {
                 type Error = ColIndexOutOfRange;
                 fn try_from(value: $ty) -> Result<Self, Self::Error> {
                     match value {
@@ -268,7 +268,7 @@ macro_rules! col_try_from_int_impl {
 macro_rules! row_try_from_int_impl {
     ($($ty:ty)*) => {
         $(
-            impl const TryFrom<$ty> for Row {
+            impl TryFrom<$ty> for Row {
                 type Error = RowIndexOutOfRange;
                 fn try_from(value: $ty) -> Result<Self, Self::Error> {
                     match value {
@@ -372,17 +372,17 @@ pub enum SquareOutOfRange {
     Col(ColIndexOutOfRange),
     Row(RowIndexOutOfRange),
 }
-impl const From<ColIndexOutOfRange> for SquareOutOfRange {
+impl From<ColIndexOutOfRange> for SquareOutOfRange {
     fn from(value: ColIndexOutOfRange) -> Self {
         Self::Col(value)
     }
 }
-impl const From<RowIndexOutOfRange> for SquareOutOfRange {
+impl From<RowIndexOutOfRange> for SquareOutOfRange {
     fn from(value: RowIndexOutOfRange) -> Self {
         Self::Row(value)
     }
 }
-impl const Add<Offset> for Square {
+impl Add<Offset> for Square {
     type Output = Result<Self, SquareOutOfRange>;
     fn add(self, rhs: Offset) -> Self::Output {
         Ok(Self {

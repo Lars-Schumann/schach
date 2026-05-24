@@ -22,8 +22,7 @@ pub(crate) const REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
 pub(crate) const FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(Clone, PartialEq, Eq)]
-#[derive(Debug, Copy)]
+#[derive(Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CastlingSide {
     Kingside,
     Queenside,
@@ -32,8 +31,7 @@ impl CastlingSide {
     pub const ALL: [Self; 2] = [Self::Kingside, Self::Queenside];
 }
 
-#[derive_const(Clone, PartialEq, Eq)]
-#[derive(Debug, Copy, Hash)]
+#[derive(Clone, PartialEq, Eq, Debug, Copy, Hash)]
 pub enum DrawKind {
     Stalemate,
     ThreefoldRepetition,
@@ -41,15 +39,14 @@ pub enum DrawKind {
     InsufficientMaterial,
 }
 
-#[derive_const(Clone, PartialEq, Eq)]
-#[derive(Debug, Copy, Hash)]
+#[derive(Clone, PartialEq, Eq, Debug, Copy, Hash)]
 pub enum GameResultKind {
     Draw(DrawKind),
     Win,
 }
 impl GameResultKind {
     #[must_use]
-    pub const fn is_win(&self) -> bool {
+    pub fn is_win(&self) -> bool {
         self == &Self::Win
     }
 }
@@ -68,8 +65,7 @@ pub struct GameResult {
 
 pub type StepResult = ControlFlow<GameResult, Game<{ Ongoing }>>;
 
-#[derive_const(Default, Clone, PartialEq, Eq)]
-#[derive(Debug, Copy, Hash)]
+#[derive(Default, Clone, PartialEq, Eq, Debug, Copy, Hash)]
 pub(crate) struct PieceCounts {
     pub(crate) white_pawn: u8,
     pub(crate) white_knight: u8,
@@ -88,24 +84,49 @@ impl PieceCounts {
     const KINGS_ONLY: Self = Self {
         white_king: 1,
         black_king: 1,
-        ..Default::default()
+        white_pawn: 0,
+        white_knight: 0,
+        white_bishop: 0,
+        white_rook: 0,
+        white_queen: 0,
+        black_pawn: 0,
+        black_knight: 0,
+        black_bishop: 0,
+        black_rook: 0,
+        black_queen: 0,
     };
 
     const _WHITE_KING_AND_TWO_KNIGHTS: Self = Self {
         white_king: 1,
         white_knight: 2,
         black_king: 1,
-        ..Default::default()
+        white_pawn: 0,
+        white_bishop: 0,
+        white_rook: 0,
+        white_queen: 0,
+        black_pawn: 0,
+        black_knight: 0,
+        black_bishop: 0,
+        black_rook: 0,
+        black_queen: 0,
     };
 
     const _BLACK_KING_AND_TWO_KNIGHTS: Self = Self {
         black_king: 1,
         black_knight: 2,
         white_king: 1,
-        ..Default::default()
+        white_pawn: 0,
+        white_knight: 0,
+        white_bishop: 0,
+        white_rook: 0,
+        white_queen: 0,
+        black_pawn: 0,
+        black_bishop: 0,
+        black_rook: 0,
+        black_queen: 0,
     };
 }
-impl const Index<Piece> for PieceCounts {
+impl Index<Piece> for PieceCounts {
     type Output = u8;
 
     fn index(&self, index: Piece) -> &Self::Output {
@@ -149,10 +170,9 @@ impl IndexMut<Piece> for PieceCounts {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq)]
-#[derive(Debug, Clone, Copy, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash)]
 pub struct FullMoveCount(pub NonZeroU64); // non-zero & unsigned because this always starts at 1 and cant decrease 
-impl const Default for FullMoveCount {
+impl Default for FullMoveCount {
     fn default() -> Self {
         Self::INITIAL
     }
@@ -169,8 +189,7 @@ impl FullMoveCount {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Copy)]
-#[derive_const(Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct FiftyMoveRuleClock(pub u64);
 impl FiftyMoveRuleClock {
     #[must_use]
@@ -186,8 +205,7 @@ impl FiftyMoveRuleClock {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Copy, Debug)]
-#[derive_const(Clone, PartialEq, Eq, Default)]
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Default)]
 pub enum RuleSet {
     #[default]
     Standard,
@@ -195,8 +213,7 @@ pub enum RuleSet {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Copy)]
-#[derive_const(Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct GameCore {
     pub board: Board,
     pub fifty_move_rule_clock: FiftyMoveRuleClock,
@@ -242,16 +259,14 @@ impl GameCore {
     }
 }
 
-#[derive(Copy, core::marker::ConstParamTy)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Copy, core::marker::ConstParamTy, Clone, PartialEq, Eq)]
 pub enum Phase {
     Ongoing,
     Terminated,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, PartialEq, Eq, Clone)]
-#[derive_const(Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Game<const P: Phase> {
     pub core: GameCore,
     pub position_history: Vec<Position>,
@@ -259,7 +274,10 @@ pub struct Game<const P: Phase> {
 }
 
 impl Game<{ Phase::Ongoing }> {
-    pub const INITIAL: Self = Self::default();
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     fn terminated(self) -> Game<{ Terminated }> {
         Game::<{ Terminated }> {
@@ -434,14 +452,13 @@ impl FnOnce<()> for Move {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum CastlingRight {
     Available,
     Unavailable,
 }
 
-impl const From<bool> for CastlingRight {
+impl From<bool> for CastlingRight {
     fn from(value: bool) -> Self {
         #[expect(clippy::match_bool)]
         match value {
@@ -451,7 +468,7 @@ impl const From<bool> for CastlingRight {
     }
 }
 
-impl const From<CastlingRight> for bool {
+impl From<CastlingRight> for bool {
     fn from(value: CastlingRight) -> Self {
         match value {
             CastlingRight::Available => true,
@@ -461,8 +478,7 @@ impl const From<CastlingRight> for bool {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct CastlingRights {
     pub white_kingside: CastlingRight,
     pub white_queenside: CastlingRight,
@@ -522,13 +538,13 @@ impl CastlingRights {
 const X: CastlingRight = CastlingRight::Available;
 const O: CastlingRight = CastlingRight::Unavailable;
 
-impl const Default for CastlingRights {
+impl Default for CastlingRights {
     fn default() -> Self {
         Self::ALL_AVAILABLE
     }
 }
 
-impl const Index<(PlayerKind, CastlingSide)> for CastlingRights {
+impl Index<(PlayerKind, CastlingSide)> for CastlingRights {
     type Output = CastlingRight;
 
     fn index(&self, (player, castling_side): (PlayerKind, CastlingSide)) -> &Self::Output {
@@ -541,7 +557,7 @@ impl const Index<(PlayerKind, CastlingSide)> for CastlingRights {
     }
 }
 
-impl const IndexMut<(PlayerKind, CastlingSide)> for CastlingRights {
+impl IndexMut<(PlayerKind, CastlingSide)> for CastlingRights {
     fn index_mut(
         &mut self,
         (player, castling_side): (PlayerKind, CastlingSide),
@@ -556,8 +572,7 @@ impl const IndexMut<(PlayerKind, CastlingSide)> for CastlingRights {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Position {
     pub board: Board,
     pub castling_rights: CastlingRights,

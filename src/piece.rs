@@ -6,8 +6,7 @@ macro_rules! no_fmt {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum PieceKind {
     Pawn,
     Knight,
@@ -45,8 +44,7 @@ impl PieceKind {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub struct Piece {
     pub owner: PlayerKind,
     pub kind: PieceKind,

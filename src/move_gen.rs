@@ -243,13 +243,13 @@ impl GameCore {
 }
 
 impl Board {
-    pub const fn apply_move(&mut self, mv: InnerMove) {
+    pub fn apply_move(&mut self, mv: InnerMove) {
         *self = self.with_move_applied(mv);
     }
 
     #[must_use]
-    pub const fn with_move_applied(mut self, mv: InnerMove) -> Self {
-        self.mov(mv.origin, mv.destination);
+    pub fn with_move_applied(mut self, mv: InnerMove) -> Self {
+        self.mv(mv.origin, mv.destination);
         match mv.kind {
             | MoveKind::Pawn(
                 PawnMove::SingleStep {
@@ -286,7 +286,7 @@ impl Board {
                 rook_target,
                 ..
             }) => {
-                self.mov(rook_start, rook_target);
+                self.mv(rook_start, rook_target);
             }
         }
         self
@@ -368,7 +368,7 @@ mod tests {
 
         let max_depth = 1_000;
         let walk_count = 25;
-        let game = Game::INITIAL;
+        let game = Game::new();
 
         for i in 0..walk_count {
             match random_walk(game.clone(), max_depth, owl_checker_depth_1) {

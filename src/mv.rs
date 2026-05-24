@@ -23,8 +23,7 @@ impl core::fmt::Debug for Threat {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum MoveKind {
     Pawn(PawnMove),
     Knight { is_capture: bool },
@@ -53,7 +52,7 @@ impl MoveKind {
     }
 
     #[must_use]
-    pub const fn is_pawn_double_step(&self) -> bool {
+    pub fn is_pawn_double_step(&self) -> bool {
         self == &Self::Pawn(PawnMove::DoubleStep)
     }
 
@@ -78,8 +77,7 @@ impl MoveKind {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub struct InnerMove {
     pub kind: MoveKind,
     pub origin: Square,
@@ -101,7 +99,7 @@ impl InnerMove {
     }
 
     #[must_use]
-    pub const fn is_pawn_or_capture(&self) -> bool {
+    pub fn is_pawn_or_capture(&self) -> bool {
         self.kind.piece_kind() == PieceKind::Pawn || self.is_capture()
     }
 }
@@ -145,8 +143,7 @@ impl Move {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum PawnMove {
     SingleStep {
         promotion_replacement: Option<Piece>,
@@ -161,8 +158,7 @@ pub enum PawnMove {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive_const(PartialEq, Eq, Clone)]
-#[derive(Debug, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum KingMove {
     Normal {
         is_capture: bool,

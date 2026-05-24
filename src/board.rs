@@ -15,13 +15,13 @@ pub const COL_COUNT: usize = 8;
 pub const ROW_COUNT: usize = 8;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Copy)]
-#[derive_const(Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Board(pub [[Option<Piece>; ROW_COUNT]; COL_COUNT]);
 impl Board {
     pub const EMPTY: Self = Self([[None; ROW_COUNT]; COL_COUNT]);
 
-    pub const STARTING_POSITION: Self = const {
+    #[must_use]
+    pub fn starting_position() -> Self {
         use crate::coord::Square as S;
         use crate::piece::Piece as P;
 
@@ -64,7 +64,7 @@ impl Board {
         board[S::H7] = Some(P::BLACK_PAWN);
 
         board
-    };
+    }
 
     pub(crate) fn threatening_moves_by(
         &self,
@@ -101,7 +101,7 @@ impl Board {
             .any(|square| square == self.king_position(king_owner))
     }
 
-    pub const fn mov(&mut self, start: Square, target: Square) {
+    pub fn mv(&mut self, start: Square, target: Square) {
         self[target] = self[start];
         self[start] = None;
     }
@@ -117,12 +117,12 @@ impl Board {
         piece_counts
     }
 }
-impl const Default for Board {
+impl Default for Board {
     fn default() -> Self {
-        Self::STARTING_POSITION
+        Self::starting_position()
     }
 }
-impl const Index<Square> for Board {
+impl Index<Square> for Board {
     type Output = Option<Piece>;
     fn index(&self, index: Square) -> &Self::Output {
         let col = usize::from(u8::from(index.col) - 1);
@@ -130,7 +130,7 @@ impl const Index<Square> for Board {
         &self.0[col][row]
     }
 }
-impl const IndexMut<Square> for Board {
+impl IndexMut<Square> for Board {
     fn index_mut(&mut self, index: Square) -> &mut Self::Output {
         let col = usize::from(u8::from(index.col) - 1);
         let row = usize::from(u8::from(index.row) - 1);
