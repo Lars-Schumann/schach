@@ -8,6 +8,7 @@ use self::Square as S;
 use self::Col as C;
 use self::Row as R;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy,  Hash)]
 #[derive_const(Clone, PartialEq, Eq)]
 pub struct Square {
@@ -119,6 +120,7 @@ impl Square {
     ];
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[derive(Debug, Copy, Hash)]
 pub enum Col {
@@ -144,6 +146,7 @@ impl Col {
     ];
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[derive(Debug, Copy, Hash)]
 pub enum Row {

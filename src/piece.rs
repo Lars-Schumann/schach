@@ -5,6 +5,7 @@ macro_rules! no_fmt {
     ($($beautiful_code:tt)*) => { $($beautiful_code)* }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub enum PieceKind {
@@ -43,6 +44,7 @@ impl PieceKind {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub struct Piece {

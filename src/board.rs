@@ -14,6 +14,7 @@ use crate::player::PlayerKind;
 pub const COL_COUNT: usize = 8;
 pub const ROW_COUNT: usize = 8;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy)]
 #[derive_const(Clone, PartialEq, Eq)]
 pub struct Board(pub [[Option<Piece>; ROW_COUNT]; COL_COUNT]);

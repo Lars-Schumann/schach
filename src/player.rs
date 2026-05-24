@@ -4,6 +4,7 @@ use crate::coord::Square as S;
 use crate::coord::Square;
 use crate::game::CastlingSide as CS;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy)]
 #[derive_const(Clone, PartialEq, Eq, Default)]
 pub enum PlayerKind {

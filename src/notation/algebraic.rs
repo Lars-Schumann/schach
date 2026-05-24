@@ -201,10 +201,3 @@ impl Move {
         notation_creator(self, OriginAmbiguationLevel::Full, capture_repr)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use std::println;
-
-    use super::*;
-}

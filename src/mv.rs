@@ -22,6 +22,7 @@ impl core::fmt::Debug for Threat {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub enum MoveKind {
@@ -76,6 +77,7 @@ impl MoveKind {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub struct InnerMove {
@@ -104,6 +106,7 @@ impl InnerMove {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Move {
     pub(crate) inner: InnerMove,
@@ -141,6 +144,7 @@ impl Move {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub enum PawnMove {
@@ -156,6 +160,7 @@ pub enum PawnMove {
     },
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive_const(PartialEq, Eq, Clone)]
 #[derive(Debug, Copy)]
 pub enum KingMove {
