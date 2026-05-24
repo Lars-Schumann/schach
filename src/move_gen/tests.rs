@@ -121,13 +121,14 @@ fn perft() {
 
 #[test]
 fn many_random_walks() {
+    use rayon::prelude::*;
     skip_if_no_expensive_test_opt_in!();
 
     let max_depth = 1_000;
-    let walk_count = 25;
+    let walk_count = 100;
     let game = Game::new();
 
-    for i in 0..walk_count {
+    (0..walk_count).into_par_iter().for_each(|i| {
         match random_walk(game.clone(), max_depth, owl_checker_depth_1) {
             MoveResult::Continue(Game { core, .. })
             | MoveResult::Break(GameResult {
@@ -135,7 +136,7 @@ fn many_random_walks() {
                 ..
             }) => println!("{i}: {:?}", core.full_move_count),
         }
-    }
+    });
 }
 
 #[allow(dead_code)]
