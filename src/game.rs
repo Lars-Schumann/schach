@@ -440,14 +440,6 @@ impl Move {
     }
 }
 
-impl FnOnce<()> for Move {
-    type Output = StepResult;
-
-    extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
-        self.make()
-    }
-}
-
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum CastlingRight {

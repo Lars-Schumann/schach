@@ -12,10 +12,8 @@
     const_trait_impl,
     const_ops,
     coroutines,
-    fn_traits,
     gen_blocks,
-    result_option_map_or_default,
-    unboxed_closures
+    result_option_map_or_default
 )]
 #![forbid(unsafe_code)]
 #![no_std]
