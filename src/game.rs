@@ -58,12 +58,6 @@ pub struct GameResult {
     pub final_game_state: Game<{ Terminated }>,
 }
 
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub enum StepResult {
-//     Ongoing(GameState<Ongoing>),
-//     Terminated(GameResult),
-// }
-
 pub type StepResult = ControlFlow<GameResult, Game<{ Ongoing }>>;
 
 #[derive(Default, Clone, PartialEq, Eq, Debug, Copy, Hash)]
