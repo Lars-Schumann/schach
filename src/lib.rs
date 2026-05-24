@@ -27,7 +27,7 @@
 #![no_std]
 extern crate alloc;
 
-#[cfg(any(test, feature = "std"))]
+#[cfg(test)]
 extern crate std;
 
 pub mod board;

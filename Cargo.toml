@@ -4,8 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-rand = { version = "0.9.2", optional = true }
-rayon = { version = "1.11.0", default-features = false, optional = true }
 serde = { version = "1.0.228", features = [
     "alloc",
     "serde_derive",
@@ -13,9 +11,7 @@ serde = { version = "1.0.228", features = [
 
 [dev-dependencies]
 owlchess = "0.4.0"
+oorandom = "11.1.5"
 
 [features]
-std = []
-rand = ["dep:rand"]
-rayon = ["dep:rayon"]
 serde = ["dep:serde"]

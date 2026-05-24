@@ -1,22 +1,22 @@
 use core::ops::Add;
-use core::ops::Not;
 use core::ops::Mul;
+use core::ops::Not;
 
-use crate::board::COL_COUNT;
-use crate::board::ROW_COUNT;
-use self::Square as S;
 use self::Col as C;
 use self::Row as R;
+use self::Square as S;
+use crate::board::COL_COUNT;
+use crate::board::ROW_COUNT;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Copy,  Hash)]
+#[derive(Debug, Copy, Hash)]
 #[derive_const(Clone, PartialEq, Eq)]
 pub struct Square {
     pub col: Col,
     pub row: Row,
 }
 
-const fn s(col: Col, row: Row) -> Square{
+const fn s(col: Col, row: Row) -> Square {
     Square::new(col, row)
 }
 

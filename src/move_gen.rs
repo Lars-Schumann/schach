@@ -24,14 +24,14 @@ use crate::piece::PieceKind;
 
 impl Game<{ Ongoing }> {
     #[must_use]
-    pub fn search(self, max_depth: u32, checker: impl Fn(&Self)) -> SearchStats {
+    fn search(self, max_depth: u32, checker: impl Fn(&Self)) -> SearchStats {
         let mut terminated_games_checkmate: Vec<Game<{ Terminated }>> = vec![];
         let mut terminated_games_draw: Vec<Game<{ Terminated }>> = vec![];
         let mut continued_games: Vec<Self> = vec![self];
         let mut new_continued_games: Vec<Self> = vec![];
 
         for _ in 0..=max_depth {
-            continued_games.clone().into_iter().for_each(|game| {
+            for game in continued_games.clone() {
                 checker(&game);
                 let legal_moves: Vec<Move> = game.legal_moves().collect();
 
@@ -50,7 +50,7 @@ impl Game<{ Ongoing }> {
                         }
                     }
                 }
-            });
+            }
 
             core::mem::swap(&mut continued_games, &mut new_continued_games);
             new_continued_games.clear();
@@ -61,36 +61,6 @@ impl Game<{ Ongoing }> {
             checkmated_games: terminated_games_checkmate.len(),
             drawn_games: terminated_games_draw.len(),
         }
-    }
-
-    #[cfg(feature = "rand")]
-    pub fn random_walk(self, max_depth: u32, checker: impl Fn(&Self)) -> StepResult {
-        use crate::alloc::borrow::ToOwned as _;
-
-        let mut rng = rand::rng();
-        let mut game = self;
-
-        for _ in 0..max_depth {
-            use rand::seq::IndexedRandom;
-
-            checker(&game);
-            let legal_moves: Vec<Move> = game.legal_moves().collect();
-
-            let random_move = legal_moves
-                .choose(&mut rng)
-                .expect("a GameState<Ongoing> to always have legal moves")
-                .to_owned();
-
-            match random_move.make() {
-                StepResult::Continue(game_state) => {
-                    game = game_state;
-                }
-                terminated @ StepResult::Break(_) => {
-                    return terminated;
-                }
-            }
-        }
-        StepResult::Continue(game)
     }
 
     pub fn legal_moves(&self) -> impl Iterator<Item = Move> {
@@ -337,22 +307,41 @@ mod tests {
     use super::*;
     use crate::testing::skip_if_no_expensive_test_opt_in;
 
-    #[test]
-    fn search() {
-        skip_if_no_expensive_test_opt_in!();
+    fn random_walk(
+        mut game: Game<{ Ongoing }>,
+        max_depth: u32,
+        checker: impl Fn(&Game<{ Ongoing }>),
+    ) -> StepResult {
+        use std::time::SystemTime;
+        use std::time::UNIX_EPOCH;
 
-        let depth = 3;
-        let game = Game::default();
+        use oorandom::Rand64;
 
-        let before = std::time::Instant::now();
+        let mut rand = Rand64::new(
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis(),
+        ); // cryptographically secure :P
 
-        let stats = game.search(depth, |_| ());
+        for _ in 0..max_depth {
+            checker(&game);
+            let legal_moves: Vec<Move> = game.legal_moves().collect();
 
-        println!("---------------------------");
-        println!("depth: {depth}");
-        println!("{stats:?}");
-        println!("elapsed: {:?}", before.elapsed());
-        println!("---------------------------");
+            #[expect(clippy::cast_possible_truncation)]
+            let random_move =
+                legal_moves[rand.rand_range(0..legal_moves.len() as u64) as usize].clone();
+
+            match random_move.make() {
+                StepResult::Continue(game_state) => {
+                    game = game_state;
+                }
+                terminated @ StepResult::Break(_) => {
+                    return terminated;
+                }
+            }
+        }
+        StepResult::Continue(game)
     }
 
     #[test]
@@ -373,26 +362,23 @@ mod tests {
         println!("---------------------------");
     }
 
-    #[cfg(feature = "rand")]
-    #[cfg(feature = "rayon")]
     #[test]
     fn many_random_walks() {
-        use rayon::prelude::*;
         skip_if_no_expensive_test_opt_in!();
 
         let max_depth = 1_000;
-        let walk_count = 1_000;
+        let walk_count = 25;
         let game = Game::INITIAL;
 
-        (0..walk_count).into_par_iter().panic_fuse().for_each(|i| {
-            match game.clone().random_walk(max_depth, owl_checker_depth_1) {
+        for i in 0..walk_count {
+            match random_walk(game.clone(), max_depth, owl_checker_depth_1) {
                 StepResult::Continue(Game { core, .. })
                 | StepResult::Break(GameResult {
                     final_game_state: Game { core, .. },
                     ..
                 }) => println!("{i}: {:?}", core.full_move_count),
             }
-        });
+        }
     }
 
     #[allow(dead_code)]

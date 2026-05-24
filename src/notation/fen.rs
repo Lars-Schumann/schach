@@ -518,9 +518,6 @@ mod tests {
     #[test]
     fn test_initial_game_state() {
         let starting_position_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        assert_eq!(
-            starting_position_fen,
-            GameCore::default().to_fen().as_str()
-        );
+        assert_eq!(starting_position_fen, GameCore::default().to_fen().as_str());
     }
 }
