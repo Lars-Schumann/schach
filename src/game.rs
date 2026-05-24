@@ -265,9 +265,26 @@ pub enum Phase {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Game<const P: Phase> {
-    pub core: GameCore,
-    pub position_history: Vec<Position>,
-    pub rule_set: RuleSet,
+    pub(crate) core: GameCore,
+    pub(crate) position_history: Vec<Position>,
+    pub(crate) rule_set: RuleSet,
+}
+
+impl<const P: Phase> Game<P> {
+    #[must_use]
+    pub const fn core(&self) -> GameCore {
+        self.core
+    }
+
+    #[must_use]
+    pub fn position_history(&self) -> &[Position] {
+        &self.position_history
+    }
+
+    #[must_use]
+    pub const fn rule_set(&self) -> RuleSet {
+        self.rule_set
+    }
 }
 
 impl Game<{ Phase::Ongoing }> {
@@ -299,7 +316,8 @@ impl Game<{ Phase::Ongoing }> {
     #[must_use]
     pub fn from_fen(fen: &str) -> Self {
         Self::with_core(
-            GameCore::try_from_fen(fen).unwrap_or_else(|_| panic!("passed invalid FEN: {fen}")),
+            GameCore::try_from_fen(fen)
+                .unwrap_or_else(|e| panic!("passed invalid FEN: {fen}, which had issue: {e:?}")),
         )
     }
 
