@@ -2,8 +2,9 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::ascii::Char as AsciiChar;
 use core::ops::Not;
-use core::ops::Not::not;
 
+use crate::common::no_fmt;
+use crate::common::not;
 use crate::game::CastlingSide;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
@@ -96,7 +97,7 @@ fn notation_creator(
                 _ => None,
             };
 
-            #[rustfmt::skip]
+            no_fmt! {
             [
                 piece_repr.as_ref().map_or_default(<[_; 1]>::as_slice),
                 start_square_repr.as_slice(),
@@ -105,6 +106,7 @@ fn notation_creator(
                 promotion_replacement.as_ref().map_or_default(<[_; 1]>::as_slice),
             ]
             .concat()
+            }
         }
     };
 

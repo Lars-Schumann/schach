@@ -1,9 +1,6 @@
+use crate::common::no_fmt;
 use crate::coord::Offset;
 use crate::player::PlayerKind;
-
-macro_rules! no_fmt {
-    ($($beautiful_code:tt)*) => { $($beautiful_code)* }
-}
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]

@@ -3,12 +3,13 @@ use core::num::NonZeroU64;
 use core::ops::ControlFlow;
 use core::ops::Index;
 use core::ops::IndexMut;
-use core::ops::Not::not;
 
 use Phase::Ongoing;
 use Phase::Terminated;
 
 use crate::board::Board;
+use crate::common::no_fmt;
+use crate::common::not;
 use crate::coord::Square;
 use crate::mv::InnerMove;
 use crate::mv::Move;
@@ -130,7 +131,7 @@ impl Index<Piece> for PieceCounts {
     type Output = u8;
 
     fn index(&self, index: Piece) -> &Self::Output {
-        #[rustfmt::skip]
+        no_fmt! {
         match index {
             Piece::WHITE_PAWN   => &self.white_pawn,
             Piece::WHITE_KNIGHT => &self.white_knight,
@@ -146,11 +147,12 @@ impl Index<Piece> for PieceCounts {
             Piece::BLACK_QUEEN  => &self.black_queen,
             Piece::BLACK_KING   => &self.black_king,
         }
+        }
     }
 }
 impl IndexMut<Piece> for PieceCounts {
     fn index_mut(&mut self, index: Piece) -> &mut Self::Output {
-        #[rustfmt::skip]
+        no_fmt! {
         match index {
             Piece::WHITE_PAWN   => &mut self.white_pawn,
             Piece::WHITE_KNIGHT => &mut self.white_knight,
@@ -165,6 +167,7 @@ impl IndexMut<Piece> for PieceCounts {
             Piece::BLACK_ROOK   => &mut self.black_rook,
             Piece::BLACK_QUEEN  => &mut self.black_queen,
             Piece::BLACK_KING   => &mut self.black_king,
+        }
         }
     }
 }

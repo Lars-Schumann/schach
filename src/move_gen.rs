@@ -1,9 +1,9 @@
 use alloc::vec;
 use alloc::vec::Vec;
 use core::ops::Not;
-use core::ops::Not::not;
 
 use crate::board::Board;
+use crate::common::not;
 use crate::coord::Square;
 use crate::game::CastlingRight;
 use crate::game::CastlingSide;
@@ -71,7 +71,7 @@ impl Game<{ Ongoing }> {
 }
 
 impl GameCore {
-    pub fn legal_inner_moves(&self) -> impl Iterator<Item = InnerMove> {
+    pub(crate) fn legal_inner_moves(&self) -> impl Iterator<Item = InnerMove> {
         self.threatening_move_candidates()
             .chain(self.pawn_step_candidates())
             .chain(self.castle_candidates())
