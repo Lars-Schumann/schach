@@ -8,7 +8,7 @@ use crate::common::not;
 use crate::game::CastlingSide;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
-use crate::game::StepResult;
+use crate::game::MoveResult;
 use crate::mv::KingMove;
 use crate::mv::Move;
 use crate::mv::MoveKind;
@@ -114,18 +114,18 @@ fn notation_creator(
 
     let mut append = vec![];
     match outcome {
-        | StepResult::Continue(future) => {
+        | MoveResult::Continue(future) => {
             if future.core.board.is_king_checked(future.core.active_player) {
                 append.push(AsciiChar::PlusSign);
             }
         }
-        | StepResult::Break(GameResult {
+        | MoveResult::Break(GameResult {
             kind: GameResultKind::Win,
             ..
         }) => {
             append.push(AsciiChar::NumberSign);
         }
-        | StepResult::Break(GameResult {
+        | MoveResult::Break(GameResult {
             kind: GameResultKind::Draw(_),
             ..
         }) => { /* TODO: nothing yet, this isn't Ascii :[ 1/2 / 1/2 or smt */ }

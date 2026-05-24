@@ -6,9 +6,9 @@ use crate::game::Game;
 use crate::game::GameCore;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
+use crate::game::MoveResult;
 use crate::game::Phase::Ongoing;
 use crate::game::Phase::Terminated;
-use crate::game::StepResult;
 use crate::mv::Move;
 use crate::testing::skip_if_no_expensive_test_opt_in;
 
@@ -38,15 +38,15 @@ fn search(
 
             for mv in legal_moves {
                 match mv.make() {
-                    StepResult::Break(GameResult {
+                    MoveResult::Break(GameResult {
                         kind: GameResultKind::Win,
                         final_game_state,
                     }) => terminated_games_checkmate.push(final_game_state),
-                    StepResult::Break(GameResult {
+                    MoveResult::Break(GameResult {
                         kind: GameResultKind::Draw(_),
                         final_game_state,
                     }) => terminated_games_draw.push(final_game_state),
-                    StepResult::Continue(game_state) => {
+                    MoveResult::Continue(game_state) => {
                         new_continued_games.push(game_state);
                     }
                 }
@@ -68,7 +68,7 @@ fn random_walk(
     mut game: Game<{ Ongoing }>,
     max_depth: u32,
     checker: impl Fn(&Game<{ Ongoing }>),
-) -> StepResult {
+) -> MoveResult {
     use std::time::SystemTime;
     use std::time::UNIX_EPOCH;
 
@@ -90,15 +90,15 @@ fn random_walk(
             legal_moves[rand.rand_range(0..legal_moves.len() as u64) as usize].clone();
 
         match random_move.make() {
-            StepResult::Continue(game_state) => {
+            MoveResult::Continue(game_state) => {
                 game = game_state;
             }
-            terminated @ StepResult::Break(_) => {
+            terminated @ MoveResult::Break(_) => {
                 return terminated;
             }
         }
     }
-    StepResult::Continue(game)
+    MoveResult::Continue(game)
 }
 
 #[test]
@@ -129,8 +129,8 @@ fn many_random_walks() {
 
     for i in 0..walk_count {
         match random_walk(game.clone(), max_depth, owl_checker_depth_1) {
-            StepResult::Continue(Game { core, .. })
-            | StepResult::Break(GameResult {
+            MoveResult::Continue(Game { core, .. })
+            | MoveResult::Break(GameResult {
                 final_game_state: Game { core, .. },
                 ..
             }) => println!("{i}: {:?}", core.full_move_count),
@@ -157,7 +157,7 @@ fn owl_checker_depth_1(game: &Game<{ Ongoing }>) {
         let owl_move = owlchess::Move::from_san(schach_move_san.as_str(), &owl_board).unwrap();
 
         let new_owl_board = owl_board.make_move(owl_move).unwrap();
-        let StepResult::Continue(new_schach_board) = mv.make() else {
+        let MoveResult::Continue(new_schach_board) = mv.make() else {
             continue;
         };
 

@@ -1,19 +1,20 @@
 use schach::game::Game;
-use schach::game::StepResult;
+use schach::game::MoveResult;
 
 fn main() {
     let game = Game::new();
     // or from a FEN String
     // let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
-    let legal_moves = game.legal_moves();
-
-    for mv in legal_moves {
-        match mv.clone().make() {
-            StepResult::Continue(next_game) => {
-                println!("Move: {:?} results in {next_game:?}", mv.san());
+    for mv in game.legal_moves() {
+        println!("Move: {:?}", mv.clone().san());
+        match mv.make() {
+            MoveResult::Continue(next_game) => {
+                println!("Results in board: {:?}\n", next_game.core().board);
             }
-            StepResult::Break(_game_result) => {}
+            MoveResult::Break(game_result) => {
+                println!("Ends the Game with Result: {:?}", game_result.kind)
+            }
         }
     }
 }
