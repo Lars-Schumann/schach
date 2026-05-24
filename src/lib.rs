@@ -16,10 +16,12 @@
     const_ops,
     coroutines,
     derive_const,
+    fn_traits,
     gen_blocks,
     import_trait_associated_functions,
     result_option_map_or_default,
-    stmt_expr_attributes
+    stmt_expr_attributes,
+    unboxed_closures
 )]
 #![forbid(unsafe_code)]
 #![no_std]

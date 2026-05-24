@@ -419,6 +419,14 @@ impl Move {
     }
 }
 
+impl FnOnce<()> for Move {
+    type Output = StepResult;
+
+    extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
+        self.make()
+    }
+}
+
 #[derive(Debug, Copy)]
 #[derive_const(Clone, PartialEq, Eq)]
 pub enum CastlingRight {

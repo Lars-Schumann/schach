@@ -9,7 +9,7 @@ fn main() {
     let legal_moves = game.legal_moves();
 
     for mv in legal_moves {
-        match mv.clone().make() {
+        match mv.clone()() {
             StepResult::Continue(next_game) => {
                 println!("Move: {:?} results in {next_game:?}", mv.san());
             }
