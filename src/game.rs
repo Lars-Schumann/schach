@@ -76,49 +76,38 @@ pub(crate) struct PieceCounts {
     pub(crate) black_king: u8,
 }
 impl PieceCounts {
-    const KINGS_ONLY: Self = Self {
-        white_king: 1,
-        black_king: 1,
+    const ZERO: Self = Self {
         white_pawn: 0,
         white_knight: 0,
         white_bishop: 0,
         white_rook: 0,
         white_queen: 0,
+        white_king: 0,
         black_pawn: 0,
         black_knight: 0,
         black_bishop: 0,
         black_rook: 0,
         black_queen: 0,
+        black_king: 0,
+    };
+    const KINGS_ONLY: Self = Self {
+        white_king: 1,
+        black_king: 1,
+        ..Self::ZERO
     };
 
     const _WHITE_KING_AND_TWO_KNIGHTS: Self = Self {
         white_king: 1,
         white_knight: 2,
         black_king: 1,
-        white_pawn: 0,
-        white_bishop: 0,
-        white_rook: 0,
-        white_queen: 0,
-        black_pawn: 0,
-        black_knight: 0,
-        black_bishop: 0,
-        black_rook: 0,
-        black_queen: 0,
+        ..Self::ZERO
     };
 
     const _BLACK_KING_AND_TWO_KNIGHTS: Self = Self {
         black_king: 1,
         black_knight: 2,
         white_king: 1,
-        white_pawn: 0,
-        white_knight: 0,
-        white_bishop: 0,
-        white_rook: 0,
-        white_queen: 0,
-        black_pawn: 0,
-        black_bishop: 0,
-        black_rook: 0,
-        black_queen: 0,
+        ..Self::ZERO
     };
 }
 impl Index<Piece> for PieceCounts {
