@@ -9,8 +9,6 @@
     adt_const_params,
     ascii_char,
     ascii_char_variants,
-    const_trait_impl,
-    const_ops,
     coroutines,
     gen_blocks,
     result_option_map_or_default

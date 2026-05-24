@@ -105,7 +105,7 @@ impl PlayerKind {
     }
 
     #[must_use]
-    pub(crate) const fn backwards_one_row(self) -> Offset {
+    pub(crate) fn backwards_one_row(self) -> Offset {
         self.forwards_one_row() * -1
     }
 }

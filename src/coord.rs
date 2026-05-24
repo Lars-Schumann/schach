@@ -303,21 +303,21 @@ pub(crate) struct Offset {
 #[allow(clippy::upper_case_acronyms)]
 impl Offset {
     pub(crate) const U: Self = Self { col: 0, row: 1 };
-    pub(crate) const D: Self = Self::U * -1;
+    pub(crate) const D: Self = mul(Self::U, -1);
     const R: Self = Self { col: 1, row: 0 };
-    const L: Self = Self::R * -1;
-    const UL: Self = Self::U + Self::L;
-    const UR: Self = Self::U + Self::R;
-    const DL: Self = Self::D + Self::L;
-    const DR: Self = Self::D + Self::R;
-    const UUL: Self = Self::U + Self::UL;
-    const UUR: Self = Self::U + Self::UR;
-    const ULL: Self = Self::UL + Self::L;
-    const URR: Self = Self::UR + Self::R;
-    const DDL: Self = Self::D + Self::DL;
-    const DDR: Self = Self::D + Self::DR;
-    const DLL: Self = Self::DL + Self::L;
-    const DRR: Self = Self::DR + Self::R;
+    const L: Self = mul(Self::R, -1);
+    const UL: Self = add(Self::U, Self::L);
+    const UR: Self = add(Self::U, Self::R);
+    const DL: Self = add(Self::D, Self::L);
+    const DR: Self = add(Self::D, Self::R);
+    const UUL: Self = add(Self::U, Self::UL);
+    const UUR: Self = add(Self::U, Self::UR);
+    const ULL: Self = add(Self::UL, Self::L);
+    const URR: Self = add(Self::UR, Self::R);
+    const DDL: Self = add(Self::D, Self::DL);
+    const DDR: Self = add(Self::D, Self::DR);
+    const DLL: Self = add(Self::DL, Self::L);
+    const DRR: Self = add(Self::DR, Self::R);
 
     pub(crate) const ROOK: [Self; 4] = [Self::U, Self::D, Self::L, Self::R];
     pub(crate) const BISHOP: [Self; 4] = [Self::UL, Self::UR, Self::DL, Self::DR];
@@ -346,24 +346,33 @@ impl Offset {
         Self::DLL,
         Self::DRR,
     ];
+
 }
 
-impl const Add for Offset {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            col: self.col + rhs.col,
-            row: self.row + rhs.row,
+const fn add(lhs: Offset, rhs: Offset) -> Offset {
+        Offset {
+            col: lhs.col + rhs.col,
+            row: lhs.row + rhs.row,
         }
     }
+
+const fn mul(lhs: Offset, rhs: i32) -> Offset {
+        Offset {
+            col: lhs.col * rhs,
+            row: lhs.row * rhs,
+        }
+    }
+
+impl Add for Offset {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        add(self,rhs)
+    }
 }
-impl const Mul<i32> for Offset {
+impl Mul<i32> for Offset {
     type Output = Self;
     fn mul(self, rhs: i32) -> Self::Output {
-        Self {
-            col: self.col * rhs,
-            row: self.row * rhs,
-        }
+        mul(self, rhs)
     }
 }
 
