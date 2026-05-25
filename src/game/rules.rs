@@ -4,17 +4,19 @@ use crate::common::not;
 use crate::game::CastlingRight;
 use crate::game::CastlingSide;
 use crate::game::DrawKind;
-use crate::game::FIFTY_MOVE_RULE_COUNT;
+use crate::game::FiftyMoveRuleClock;
 use crate::game::Game;
 use crate::game::GameResult;
 use crate::game::GameResultKind;
 use crate::game::Phase::Ongoing;
 use crate::game::PieceCounts;
 use crate::game::Position;
-use crate::game::REPETITIONS_TO_FORCED_DRAW_COUNT;
 use crate::mv::InnerMove;
 use crate::mv::MoveKind;
 use crate::player::PlayerKind;
+
+pub(crate) const REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
+pub(crate) const FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
 
 pub(super) fn set_active_player_castling_rights(mv: InnerMove, game: &mut Game<{ Ongoing }>) {
     match mv.kind {

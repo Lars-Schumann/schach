@@ -19,9 +19,6 @@ use crate::player::PlayerKind;
 
 mod rules;
 
-pub(crate) const REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
-pub(crate) const FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
-
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CastlingSide {
