@@ -1,5 +1,3 @@
-use core::ops::ControlFlow;
-
 use crate::common::not;
 use crate::game::CastlingRight;
 use crate::game::CastlingSide;
@@ -17,6 +15,8 @@ use crate::player::PlayerKind;
 
 pub(crate) const REPETITIONS_TO_FORCED_DRAW_COUNT: usize = 5;
 pub(crate) const FIFTY_MOVE_RULE_COUNT: FiftyMoveRuleClock = FiftyMoveRuleClock(100);
+
+pub(super) type CheckResult = core::ops::ControlFlow<GameResult, Game<{ Ongoing }>>;
 
 pub(super) fn set_active_player_castling_rights(mv: InnerMove, game: &mut Game<{ Ongoing }>) {
     match mv.kind {
@@ -85,27 +85,27 @@ pub(super) fn set_fifty_move_rule_clock(mv: InnerMove, game: &mut Game<{ Ongoing
     }
 }
 
-pub(super) fn check_stalemate_or_checkmate(game: &Game<{ Ongoing }>) -> ControlFlow<GameResult> {
+pub(super) fn check_stalemate_or_checkmate(game: Game<{ Ongoing }>) -> CheckResult {
     let future = game.core.with_opponent_active();
 
     if future.legal_inner_moves().count() > 0 {
-        return ControlFlow::Continue(());
+        return CheckResult::Continue(game);
     }
 
     if future.board.is_king_checked(future.active_player) {
-        ControlFlow::Break(GameResult {
+        CheckResult::Break(GameResult {
             kind: GameResultKind::Win,
-            final_game_state: game.clone().terminated(),
+            final_game_state: game.terminated(),
         })
     } else {
-        ControlFlow::Break(GameResult {
+        CheckResult::Break(GameResult {
             kind: GameResultKind::Draw(DrawKind::Stalemate),
-            final_game_state: game.clone().terminated(),
+            final_game_state: game.terminated(),
         })
     }
 }
 
-pub(super) fn check_threefold_repetition_draw(game: &Game<{ Ongoing }>) -> ControlFlow<GameResult> {
+pub(super) fn check_threefold_repetition_draw(game: Game<{ Ongoing }>) -> CheckResult {
     let current_position = Position {
         board: game.core.board,
         castling_rights: game.core.castling_rights,
@@ -119,38 +119,36 @@ pub(super) fn check_threefold_repetition_draw(game: &Game<{ Ongoing }>) -> Contr
         .count()
         == REPETITIONS_TO_FORCED_DRAW_COUNT
     {
-        ControlFlow::Break(GameResult {
+        CheckResult::Break(GameResult {
             kind: GameResultKind::Draw(DrawKind::ThreefoldRepetition),
-            final_game_state: game.clone().terminated(),
+            final_game_state: game.terminated(),
         })
     } else {
-        ControlFlow::Continue(())
+        CheckResult::Continue(game)
     }
 }
 
-pub(super) fn check_fifty_move_draw(game: &Game<{ Ongoing }>) -> ControlFlow<GameResult> {
+pub(super) fn check_fifty_move_draw(game: Game<{ Ongoing }>) -> CheckResult {
     if game.core.fifty_move_rule_clock == FIFTY_MOVE_RULE_COUNT {
-        ControlFlow::Break(GameResult {
+        CheckResult::Break(GameResult {
             kind: GameResultKind::Draw(DrawKind::FiftyMove),
-            final_game_state: game.clone().terminated(),
+            final_game_state: game.terminated(),
         })
     } else {
-        ControlFlow::Continue(())
+        CheckResult::Continue(game)
     }
 }
 
-pub(super) fn check_insufficient_material_draw(
-    game: &Game<{ Ongoing }>,
-) -> ControlFlow<GameResult> {
+pub(super) fn check_insufficient_material_draw(game: Game<{ Ongoing }>) -> CheckResult {
     let piece_counts = game.core.board.piece_counts();
 
     if piece_counts == PieceCounts::KINGS_ONLY {
-        ControlFlow::Break(GameResult {
+        CheckResult::Break(GameResult {
             kind: GameResultKind::Draw(DrawKind::InsufficientMaterial),
-            final_game_state: game.clone().terminated(),
+            final_game_state: game.terminated(),
         })
     } else {
-        ControlFlow::Continue(())
+        CheckResult::Continue(game)
     }
 }
 

@@ -329,14 +329,14 @@ impl Game<{ Phase::Ongoing }> {
             rules::set_fifty_move_rule_clock(mv, &mut game);
         }
 
-        rules::check_stalemate_or_checkmate(&game)?;
+        game = rules::check_stalemate_or_checkmate(game)?;
 
         if game.rule_set != RuleSet::Perft {
-            rules::check_threefold_repetition_draw(&game)?;
-            rules::check_fifty_move_draw(&game)?;
+            game = rules::check_threefold_repetition_draw(game)?;
+            game = rules::check_fifty_move_draw(game)?;
         }
 
-        rules::check_insufficient_material_draw(&game)?;
+        game = rules::check_insufficient_material_draw(game)?;
 
         rules::set_full_move_count(&mut game);
 
