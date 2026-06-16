@@ -1,9 +1,9 @@
+use alloc::vec;
 use alloc::vec::Vec;
 use core::num::NonZeroU64;
 use core::ops::ControlFlow;
 use core::ops::Index;
 use core::ops::IndexMut;
-use std::vec;
 
 use Phase::Ongoing;
 use Phase::Terminated;
