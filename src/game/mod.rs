@@ -3,6 +3,7 @@ use core::num::NonZeroU64;
 use core::ops::ControlFlow;
 use core::ops::Index;
 use core::ops::IndexMut;
+use std::vec;
 
 use Phase::Ongoing;
 use Phase::Terminated;
@@ -10,6 +11,7 @@ use Phase::Terminated;
 use crate::board::Board;
 use crate::common::no_fmt;
 use crate::coord::Square;
+use crate::game::RuleSet::Perft;
 use crate::mv::InnerMove;
 use crate::mv::Move;
 use crate::mv::Threat;
@@ -305,6 +307,24 @@ impl Game<{ Phase::Ongoing }> {
             GameCore::try_from_fen(fen)
                 .unwrap_or_else(|e| panic!("passed invalid FEN: {fen}, which had issue: {e:?}")),
         )
+    }
+
+    pub fn perft_try_from_fen(fen: &str) -> Result<Self, GameFromFenError> {
+        Ok(Self {
+            core: GameCore::try_from_fen(fen)?,
+            position_history: vec![],
+            rule_set: Perft,
+        })
+    }
+
+    #[must_use]
+    pub fn perft_from_fen(fen: &str) -> Self {
+        Self {
+            core: GameCore::try_from_fen(fen)
+                .unwrap_or_else(|e| panic!("passed invalid FEN: {fen}, which had issue: {e:?}")),
+            position_history: vec![],
+            rule_set: Perft,
+        }
     }
 
     #[must_use]
